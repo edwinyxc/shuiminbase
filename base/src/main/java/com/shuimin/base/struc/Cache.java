@@ -58,6 +58,6 @@ public abstract class Cache<K, V> {
 	}
 
 	public static <K, V> Cache<K, V> defaultCache(int max) {
-		return new DefaultCache<>(max);
+		return new DefaultCache<K,V>(max);
 	}
 }

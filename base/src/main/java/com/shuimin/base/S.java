@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.shuimin.base.struc.IterableEnumeration;
 import com.shuimin.base.struc.Matrix;
 import com.shuimin.base.util.cui.Rect;
 import com.shuimin.base.util.logger.Logger;
@@ -67,17 +69,22 @@ public class S {
 		return t;
 	}
 	
-	public static <T> ForIt<T> _for(Iterable<T> iterable) {
-		return For.<T>_(iterable);
+	public final static <E> ForIt<E> _for(Iterable<E> c) {
+		return new ForIt<E>(c);
 	}
 
-	public static <T> ForIt<T> _for(T[] t) {
-		return For.<T>_(t);
+	public final static <E> ForIt<E> _for(E[] c) {
+		return new ForIt<E>(c);
+	}
+	
+	public final static <E> ForIt<E> _for(Enumeration<E> emun) {
+		return new ForIt<E>(new IterableEnumeration<E>(emun));
 	}
 
-	public static <K, V> ForMap<K,V> _for(Map<K, V> map) {
-		return For.<K,V>_(map);
+	public final static <K, V> ForMap<K, V> _for(Map<K, V> c) {
+		return new ForMap<K, V>(c);
 	}
+
 	
 	@SuppressWarnings("unchecked")
 	public static <T> T _one(Class<?> clazz){
