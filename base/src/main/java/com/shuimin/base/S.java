@@ -6,43 +6,26 @@
  */
 package com.shuimin.base;
 
-import com.shuimin.base.f.Callback;
-import com.shuimin.base.f.Function;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Method;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
-
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
-
-import com.shuimin.base.f.None;
-import com.shuimin.base.f.Option;
-import com.shuimin.base.f.Some;
+import com.shuimin.base.f.*;
 import com.shuimin.base.struc.Cache;
 import com.shuimin.base.struc.IterableEnumeration;
 import com.shuimin.base.struc.Matrix;
 import com.shuimin.base.util.cui.Rect;
 import com.shuimin.base.util.logger.Logger;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
-import java.util.Arrays;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class S {
 
@@ -306,8 +289,6 @@ public class S {
      * assert
      *
      * @param a
-     * @param testee
-     * @param tester
      * @param err
      */
     public static void _assert(Object a, String err) {
@@ -442,7 +423,7 @@ public class S {
         } else if (o instanceof Iterable) {
             return "["
                     + String.join(",", _for((Iterable) o).
-                            <String>map((i) -> (dump(i))).val())
+                            map((i) -> (dump(i))).val())
                     + "]";
         } else if (clazz.isArray()) {
             return "["
@@ -450,7 +431,7 @@ public class S {
                             <String>map((i) -> (dump(i))).val())
                     + "]";
         } else if (o instanceof Map) {
-            return _for((Map) o).<String>map((i) -> (dump(i))).val().toString();
+            return _for((Map) o).map((i) -> (dump(i))).val().toString();
         } else {
             return o.toString();
         }
@@ -530,7 +511,7 @@ public class S {
 
     public final static class ForIt<E> {
 
-        final Iterable<E> iter;
+        private final Iterable<E> iter;
 
         public ForIt(Collection<E> e) {
             iter = e;
@@ -566,13 +547,11 @@ public class S {
             each((e) -> {
                 result.add(mapper.apply(e));
             });
-            return new ForIt<R>(result);
+            return new ForIt(result);
         }
 
         public ForIt<E> each(Callback<E> eachFunc) {
-            for (E e : iter) {
-                eachFunc.apply(e);
-            }
+            iter.forEach(eachFunc::apply);
             return this;
         }
 
@@ -584,7 +563,7 @@ public class S {
                     c.add(e);
                 }
             });
-            return new ForIt<E>(c);
+            return new ForIt(c);
         }
 
         public E reduce(final Function._2<E, E, E> reduceLeft) {
@@ -739,12 +718,9 @@ public class S {
                 if (this.size() == 1) {
                     return this.get(0);
                 }
-                T result = null;
-                T next;
-                for (int i = 0; i < this.size() - 1; i++) {
-                    result = this.get(i);
-                    next = this.get(i + 1);
-                    result = reduceFunc.apply(result, next);
+                T result = this.get(0);
+                for (int i = 1; i < this.size(); i++) {
+                    result = reduceFunc.apply(result, this.get(i));
                 }
                 return result;
             }
@@ -774,19 +750,19 @@ public class S {
         }
 
         public static <E> FList<E> one() {
-            return new FList<E>();
+            return new FList();
         }
 
         public static <E> FList<E> one(Iterable<E> iterable) {
-            return new FList<E>(iterable);
+            return new FList(iterable);
         }
 
         public static <E> FList<E> one(E[] arr) {
-            return new FList<E>(arr);
+            return new FList(arr);
         }
 
         public static <E> FList<E> one(List<E> list) {
-            return new FList<E>(list);
+            return new FList(list);
         }
     }
 
@@ -805,9 +781,9 @@ public class S {
         @SuppressWarnings("unchecked")
         public static <K, V> HashMap<K, V> hashMap(Object[][] kv) {
             if (kv == null) {
-                return new HashMap<K, V>();
+                return new HashMap();
             }
-            HashMap<K, V> ret = new HashMap<K, V>();
+            HashMap<K, V> ret = new HashMap();
             for (Object[] entry : kv) {
                 if (entry.length >= 2) {
                     ret.put((K) entry[0], (V) entry[1]);
@@ -828,7 +804,6 @@ public class S {
          * Print a matrix whose each row as a String.
          * </p>
          *
-         * @param r
          * @return
          */
         public static String mkStr(Rect r) {
@@ -873,13 +848,13 @@ public class S {
 
         public static Matrix fromString(String... s) {
             S.echo(s);
-            final int maxLen = ((String) list.one(S.array.<String>of(S.array.compact(s))).reduceLeft(
+            final int maxLen = list.one(array.<String>of(array.compact(s))).reduceLeft(
                     (String a, String b) -> {
                         if (a == null || b == null) {
                             return "";
                         }
                         return a.length() > b.length() ? a : b;
-                    })).length();
+                    }).length();
 
             int[][] ret = new int[s.length][maxLen];
             for (int i = 0; i < s.length; i++) {
@@ -906,13 +881,7 @@ public class S {
         public final static Double _double = new Double(0);
 
         final static Cache<Class<?>, Object> _nothingValues = Cache.<Class<?>, Object>defaultCache().onNotFound(
-                new Function<Object, Class<?>>() {
-
-                    @Override
-                    public Object apply(Class<?> a) {
-                        return Enhancer.create(_notNull(a), (MethodInterceptor) (Object obj, Method method, Object[] args, MethodProxy proxy) -> null);
-                    }
-                });
+            a -> Enhancer.create(_notNull(a), (MethodInterceptor) (Object obj, Method method, Object[] args, MethodProxy proxy) -> null));
 
         static {
             _nothingValues.put(String.class, "").put(Boolean.class, _boolean).put(Integer.class, _int)
@@ -951,7 +920,7 @@ public class S {
 
         final private Class<T> _clazz;
         final private T _t;
-        final Map<String, Function<Object, Object[]>> _mm = new HashMap<String, Function<Object, Object[]>>(5);
+        final Map<String, Function<Object, Object[]>> _mm = new HashMap<>(5);
 
         private proxy(Class<T> clazz, T t) {
             _clazz = clazz;
@@ -959,11 +928,11 @@ public class S {
         }
 
         public static <T> proxy<T> one(Class<T> clazz) throws InstantiationException, IllegalAccessException {
-            return new proxy<T>(clazz, S.<T>_one(clazz));
+            return new proxy(clazz, S.<T>_one(clazz));
         }
 
         public static <T> proxy<T> of(T t) {
-            return new proxy<T>((Class<T>) t.getClass(), t);
+            return new proxy((Class<T>) t.getClass(), t);
         }
 
         public T origin() {
@@ -981,14 +950,7 @@ public class S {
 
         public T create() {
             return (T) Enhancer.create(_clazz,
-                    new MethodInterceptor() {
-
-                        @Override
-                        public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-                            return _avoidNull(_mm.get(method.getName()), Function.class).apply(args);
-                        }
-
-                    });
+                (MethodInterceptor) (obj, method, args, proxy) -> _avoidNull(_mm.get(method.getName()), Function.class).apply(args));
 
         }
     }
