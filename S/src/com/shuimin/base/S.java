@@ -19,18 +19,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import com.shuimin.base.f.F2;
+import com.shuimin.base.f.FArray;
+import com.shuimin.base.struc.Matrix;
+import com.shuimin.base.util.cui.Rect;
 import com.shuimin.base.util.logger.Logger;
 
 public class S {
 	/******************* logger ******************/
 	private final static Logger logger = Logger.getDefault();
 
-	public final Logger logger() {
+	public static final Logger logger() {
 		return logger;
 	}
 
 	/******************* meta ******************/
-	public final String version() {
+	public static final String version() {
 		return "v0.0.1 2014";
 	}
 
@@ -128,7 +132,7 @@ public class S {
 			}
 			return array;
 		}
-		
+
 		public static Object convertType(Class<?> clazz, Object[] arr) {
 			Object array = java.lang.reflect.Array.newInstance(clazz,
 					arr.length);
@@ -242,25 +246,28 @@ public class S {
 
 	public static String echots(Object o) {
 		StringBuilder ret = new StringBuilder();
+		if (o.getClass().isPrimitive()) {
+			ret.append(o);
+		}
 		if (o instanceof String) {
 			ret.append((String) o);
 		} else if (o instanceof List) {
-			ret.append("\n[List@").append(o.hashCode()).append("]\n");
+			ret.append("[");
 			for (int i = 0; i < ((List<?>) o).size(); i++) {
-				ret.append("\n [").append(i).append("]")
-						.append(String.valueOf(((List<?>) o).get(i)));
+				ret.append(String.valueOf(((List<?>) o).get(i)));
+				if (i != ((List<?>) o).size() - 1)
+					ret.append(',');
 			}
+			ret.append("]");
 		} else if (o.getClass().isArray()) {
-			ret.append("\n[Array@").append(o.hashCode()).append("]\n");
+			ret.append("[");
 			for (int i = 0; i < java.lang.reflect.Array.getLength(o); i++) {
-				ret.append("\n [")
-						.append(i)
-						.append("]")
-						.append(String.valueOf(java.lang.reflect.Array
-								.get(o, i)));
+				ret.append(String.valueOf(java.lang.reflect.Array.get(o, i)));
+				if (i != java.lang.reflect.Array.getLength(o) - 1)
+					ret.append(',');
 			}
+			ret.append("]");
 		} else {
-			ret.append("\n[Object@").append(o.hashCode()).append("]\n");
 			ret.append(o.toString());
 		}
 		return ret.toString();
@@ -336,6 +343,12 @@ public class S {
 	/********************* K ***********************/
 	/********************* L ***********************/
 	/********************* M ***********************/
+	public static class math {
+		public static int max(int a, int b) {
+			return a > b ? a : b;
+		}
+	}
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static class map {
 		public HashMap hashMap(Object[][] kv) {
@@ -344,6 +357,97 @@ public class S {
 				ret.put(entry[0], entry[1]);
 			}
 			return ret;
+		}
+	}
+
+	public static class matrix {
+		
+		public static Matrix console(int maxLength){
+			return new Matrix(0,maxLength);
+		}
+		
+		/**
+		 * <p>Print a matrix whose each row as a String.</p> 
+		 * @param r
+		 * @return
+		 */
+		public static String mkStr(Rect r) {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < r.height; i++) {
+				for (int j = 0; j < r.width; j++) {
+					char c = (char) r.data.get(i, j);
+					sb.append(c);
+				}
+				sb.append("\n");
+			}
+			return sb.toString();
+		}
+
+		public static Matrix addHorizontal(Matrix... some) {
+			int height = 0;
+			int width = 0;
+			for (int i = 0; i < some.length; i++) {
+				Matrix x = some[i];
+				height = S.math.max(height, x.rows());
+				width += x.cols();
+			}
+
+			int[][] out = new int[height][width];
+			for (int i = 0; i < height; i++) {
+				for (int j = 0; j < width; j++) {
+					out[i][j] = ' ';
+				}
+			}
+
+			int colfix = 0;
+			for (int i = 0; i < some.length; i++) {
+				Matrix x = some[i];
+				for (int h = 0; h < x.rows(); h++) {
+					int[] row = x.getRow(h);
+					for (int _ = 0; _ < row.length; _++) {
+						out[h][colfix + _] = (char) row[_];
+					}
+				}
+				colfix += x.cols();
+			}
+			return new Matrix(out);
+		}
+
+		public static Matrix fromRow(String... strx) {
+			int length = 0;
+			for (int i = 0; i < strx.length; i++) {
+				length += strx[i].length();
+			}
+			int[] ret = new int[length];
+			int idx = 0;
+			for (int i = 0; i < strx.length; i++) {
+				char[] charArr = strx[i].toCharArray();
+				for (int j = 0; j < charArr.length; j++) {
+					ret[idx++] = charArr[j];
+				}
+			}
+			return new Matrix(ret);
+		}
+
+		public static Matrix fromRows(String[] s) {
+
+			final int maxLen = ((String) new FArray<String>(s)
+					.reduceLeft(new F2<String, String, String>() {
+
+						@Override
+						public String f(String a, String b) {
+							return a.length() > b.length() ? a : b;
+						}
+
+					})).length();
+
+			int[][] ret = new int[s.length][maxLen];
+			for (int i = 0; i < s.length; i++) {
+				for (int j = 0; j < s[i].length(); j++) {
+					ret[i][j] = s[i].charAt(j);
+				}
+			}
+			return new Matrix(ret);
 		}
 	}
 
@@ -470,6 +574,10 @@ public class S {
 	}
 
 	/********************* T ***********************/
+	public static long time() {
+		return System.currentTimeMillis();
+	}
+
 	/********************* U ***********************/
 	public static class uuid {
 		public static String str() {

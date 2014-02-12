@@ -44,6 +44,10 @@ public class FArray<T> extends ArrayList<T> {
 		}
 	}
 
+	public FArray(int i) {
+		super(i);
+	}
+
 	public FArray<T> slice(int start, int end) {
 		final FArray<T> ret = new FArray<T>();
 		for (int i = start; i < end; i++) {
@@ -59,12 +63,36 @@ public class FArray<T> extends ArrayList<T> {
 		}
 		return ret;
 	}
-	
-	public String join(String sep){
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Object reduceLeft(F2 reduceFunc) {
+		Object result = null;
+		T next;
+		for (int i = 0; i < this.size() - 1; i++) {
+			result = this.get(i);
+			next = this.get(i + 1);
+			result = reduceFunc.f(result, next);
+		}
+		return result;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Object reduceRight(F2 reduceFunc) {
+		Object result = null;
+		T next;
+		for (int i = this.size() - 1; i >= 1; i--) {
+			result = this.get(i);
+			next = this.get(i - 1);
+			result = reduceFunc.f(result, next);
+		}
+		return result;
+	}
+
+	public String join(String sep) {
 		final StringBuilder sb = new StringBuilder();
-		for(T t:this){
+		for (T t : this) {
 			sb.append(t.toString()).append(sep);
 		}
 		return sb.toString();
-	} 
+	}
 }

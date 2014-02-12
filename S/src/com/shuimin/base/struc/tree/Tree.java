@@ -119,11 +119,11 @@ public interface Tree<T> extends Namable<Tree<T>>, Attrs<Tree<T>> {
 	 * @param findFunc
 	 * @return
 	 */
-	Tree<T> find(F<Boolean, T> findFunc);
+	Tree<T> find(F<Boolean, Tree<T>> findFunc);
 
 	/**
 	 * <p>
-	 * select from children,return the first one satisfy the input
+	 * Select from children,return the first one satisfy the input
 	 * </p>
 	 * 
 	 * @param name
@@ -225,7 +225,8 @@ public interface Tree<T> extends Namable<Tree<T>>, Attrs<Tree<T>> {
 	 * @return
 	 */
 	boolean isLeaf();
-
+	boolean isLast();
+	boolean isFirst();
 	boolean isRoot();
 
 	void remove();
@@ -239,4 +240,6 @@ public interface Tree<T> extends Namable<Tree<T>>, Attrs<Tree<T>> {
 	Iterator<Tree<T>> dfs();
 
 	Selector<Tree<T>> selector();
+	
+	String toString();
 }
