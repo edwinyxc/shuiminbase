@@ -3,19 +3,24 @@ package com.shuimin.base.struc;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * <p>
+ * Ugly matrix
+ * </p>
+ * 
+ * @author ed
+ * 
+ */
 public class Matrix {
 
 	private int[] data;
 	private int cols, rows;
 
-	public int[][] raw() {
-		int[][] ret = new int[rows][cols];
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				ret[i][j] = get(i, j);
-			}
-		}
-		return ret;
+	public Matrix(final int rows, final int cols) {
+		this.cols = cols;
+		this.rows = rows;
+		this.data = new int[rows * cols];
+		init_with_zero();
 	}
 
 	public Matrix(final int[] values) {
@@ -34,144 +39,6 @@ public class Matrix {
 				data[count++] = (values[i][j]);
 			}
 		}
-	}
-
-	public Matrix(final int rows, final int cols) {
-		this.cols = cols;
-		this.rows = rows;
-		this.data = new int[rows * cols];
-		init_with_zero();
-	}
-
-	private void init_with_zero() {
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				data[i * cols + j] = (0);
-			}
-		}
-	}
-
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder();
-		// sb.append("\n");
-		// sb.append("Original vector:\n");
-		// for (int i = 0; i < data.length; i++) {
-		// sb.append(data[i]);
-		// }
-		for (int i = 0; i < rows; i++) {
-			sb.append("\n");
-			for (int j = 0; j < cols; j++) {
-				sb.append(String.valueOf(get(i, j))).append(" ");
-			}
-		}
-		return sb.toString();
-	}
-
-	public int get(int row, int col) {
-		return data[row * cols + col];
-	}
-
-	public void set(int row, int col, int value) {
-		this.data[row * cols + col] = value;
-	}
-
-	public int[] getRow(int row) {
-		int[] ret = new int[cols];
-		for (int i = 0; i < cols; i++) {
-			ret[i] = data[row * cols + i];
-		}
-		return ret;
-	}
-
-	public void addRow(int[] values) {
-		addRow(rows, values);
-	}
-
-	public void addRow(int row, int[] values) {
-		if (row > rows || row < 0) {
-			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE,
-					"invalid parameter:row:");
-			return;
-		}
-		modCapacity(cols);
-		int cpidx_from = row * cols;
-		int cpidx_to = cpidx_from + cols;
-		// System.err.println(cpidx_from + "," + cpidx_to);
-		System.arraycopy(data, cpidx_from, data, cpidx_to, cols * (rows - row));
-		for (int i = 0; i < cols; i++) {
-			if (i < values.length) {
-				data[cpidx_from + i] = values[i];
-			} else {
-				data[cpidx_from + i] = 0;
-			}
-		}
-		rows++;
-	}
-	public void addRows(int[][] values){
-		addRows(rows,values);
-	}
-
-	public void addRows(int row, int[][] values) {
-		if (row > rows || row < 0) {
-			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE,
-					"invalid parameter:row:");
-			return;
-		}
-		int times = values.length;
-		modCapacity(cols * times);
-		int cpidx_from = row * cols;
-		int cpidx_to = cpidx_from + cols * times;
-		System.arraycopy(data, cpidx_from, data, cpidx_to, cols * (rows - row));
-		int idx = row * cols;
-		for (int i = 0; i < values.length; i++) {
-			for (int j = 0; j < cols; j++) {
-				if (j < values[i].length) {
-					data[idx + i * cols + j] = values[i][j];
-				} else {
-					data[idx + i * cols + j] = 0;
-				}
-			}
-		}
-		rows += times;
-	}
-
-	public void delRow(int row) {
-		if (row >= rows || row < 0) {
-			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE,
-					"invalid parameter:row:");
-			return;
-		}
-		int begin_idx = row * cols;
-		if ((begin_idx + cols) < data.length) {
-			System.arraycopy(data, begin_idx + cols, data, begin_idx, cols);
-		}
-		modCapacity(cols * (-1));
-		rows--;
-	}
-
-	public void delRows(int beginRow, int endRow) {
-		if ((beginRow < 0 || endRow > rows) || beginRow > endRow) {
-			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE,
-					"invalid parameter:begin or end");
-			return;
-		}
-		int times = endRow - beginRow + 1;
-		int begin_idx = beginRow * cols;
-		if ((begin_idx + cols * times) < data.length) {
-			System.arraycopy(data, begin_idx + cols * times, data, begin_idx,
-					cols * times);
-		}
-		modCapacity(cols * -1);
-		rows -= times;
-	}
-
-	public int[] getCol(int col) {
-		int[] ret = new int[rows];
-		for (int i = 0; i < rows; i++) {
-			ret[i] = data[i * cols + col];
-		}
-		return ret;
 	}
 
 	public void addCol(int col, int[] values) {
@@ -196,6 +63,23 @@ public class Matrix {
 				data[i] = 0;
 			}
 
+		}
+	}
+
+	private void addColHelper(int addColNum) {
+		/* here we assert size is ok */
+
+		int old_cols = cols;
+		/* first add cols */
+		cols += addColNum;
+		/* cols now is the new one. */
+
+		int old_length = data.length - addColNum * rows;
+		int move_step = (rows - 1) * addColNum;
+		int right = 1;
+		for (int mv_blk = old_length - old_cols; mv_blk > 0; mv_blk -= old_cols) {
+			innerMove(mv_blk, old_cols, right, move_step);
+			move_step -= addColNum;
 		}
 	}
 
@@ -229,6 +113,67 @@ public class Matrix {
 			cnt_y++;
 			cnt_x = 0;
 		}
+	}
+
+	public void addRow(int row, int[] values) {
+		if (row > rows || row < 0) {
+			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE,
+					"invalid parameter:row:");
+			return;
+		}
+		modCapacity(cols);
+		int cpidx_from = row * cols;
+		int cpidx_to = cpidx_from + cols;
+		// System.err.println(cpidx_from + "," + cpidx_to);
+		System.arraycopy(data, cpidx_from, data, cpidx_to, cols * (rows - row));
+		for (int i = 0; i < cols; i++) {
+			if (i < values.length) {
+				data[cpidx_from + i] = values[i];
+			} else {
+				data[cpidx_from + i] = 0;
+			}
+		}
+		rows++;
+	}
+
+	public void addRow(int[] values) {
+		addRow(rows, values);
+	}
+
+	public void addRows(Matrix x) {
+		addRows(x.raw());
+	}
+
+	public void addRows(int row, int[][] values) {
+		if (row > rows || row < 0) {
+			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE,
+					"invalid parameter:row:");
+			return;
+		}
+		int times = values.length;
+		modCapacity(cols * times);
+		int cpidx_from = row * cols;
+		int cpidx_to = cpidx_from + cols * times;
+		System.arraycopy(data, cpidx_from, data, cpidx_to, cols * (rows - row));
+		int idx = row * cols;
+		for (int i = 0; i < values.length; i++) {
+			for (int j = 0; j < cols; j++) {
+				if (j < values[i].length) {
+					data[idx + i * cols + j] = values[i][j];
+				} else {
+					data[idx + i * cols + j] = 0;
+				}
+			}
+		}
+		rows += times;
+	}
+
+	public void addRows(int[][] values) {
+		addRows(rows, values);
+	}
+
+	public int cols() {
+		return this.cols;
 	}
 
 	public void delCol(int col) {
@@ -283,16 +228,72 @@ public class Matrix {
 		this.cols -= times;
 	}
 
-	public int cols() {
-		return this.cols;
+	public void delRow(int row) {
+		if (row >= rows || row < 0) {
+			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE,
+					"invalid parameter:row:");
+			return;
+		}
+		int begin_idx = row * cols;
+		if ((begin_idx + cols) < data.length) {
+			System.arraycopy(data, begin_idx + cols, data, begin_idx, cols);
+		}
+		modCapacity(cols * (-1));
+		rows--;
 	}
 
-	public int rows() {
-		return this.rows;
+	public void delRows(int beginRow, int endRow) {
+		if ((beginRow < 0 || endRow > rows) || beginRow > endRow) {
+			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE,
+					"invalid parameter:begin or end");
+			return;
+		}
+		int times = endRow - beginRow + 1;
+		int begin_idx = beginRow * cols;
+		if ((begin_idx + cols * times) < data.length) {
+			System.arraycopy(data, begin_idx + cols * times, data, begin_idx,
+					cols * times);
+		}
+		modCapacity(cols * -1);
+		rows -= times;
 	}
 
-	public int volume() {
-		return data.length;
+	public int get(int row, int col) {
+		return data[row * cols + col];
+	}
+
+	public int[] col(int col) {
+		int[] ret = new int[rows];
+		for (int i = 0; i < rows; i++) {
+			ret[i] = data[i * cols + col];
+		}
+		return ret;
+	}
+
+	private void init_with_zero() {
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				data[i * cols + j] = (0);
+			}
+		}
+	}
+
+	private void innerMove(int src, int length, int dierction, int step) {
+		if (dierction > 0) {
+			for (int i = src + length - 1; i >= src; i--) {
+				if (i + step < data.length) {
+					data[i + step] = data[i];
+					data[i] = 0;
+				}
+			}
+		} else {
+			for (int i = src; i < src + length; i++) {
+				if (i < data.length) {
+					data[i - step] = data[i];
+					data[i] = 0;
+				}
+			}
+		}
 	}
 
 	/**
@@ -317,21 +318,47 @@ public class Matrix {
 		this.data = newData;
 	}
 
-	private void addColHelper(int addColNum) {
-		/* here we assert size is ok */
-
-		int old_cols = cols;
-		/* first add cols */
-		cols += addColNum;
-		/* cols now is the new one. */
-
-		int old_length = data.length - addColNum * rows;
-		int move_step = (rows - 1) * addColNum;
-		int right = 1;
-		for (int mv_blk = old_length - old_cols; mv_blk > 0; mv_blk -= old_cols) {
-			innerMove(mv_blk, old_cols, right, move_step);
-			move_step -= addColNum;
+	public int[][] raw() {
+		int[][] ret = new int[rows][cols];
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				ret[i][j] = get(i, j);
+			}
 		}
+		return ret;
+	}
+
+	public int[] row(int row) {
+		int[] ret = new int[cols];
+		for (int i = 0; i < cols; i++) {
+			ret[i] = data[row * cols + i];
+		}
+		return ret;
+	}
+
+	public int rows() {
+		return this.rows;
+	}
+
+	public void set(int row, int col, int value) {
+		this.data[row * cols + col] = value;
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+		// sb.append("\n");
+		// sb.append("Original vector:\n");
+		// for (int i = 0; i < data.length; i++) {
+		// sb.append(data[i]);
+		// }
+		for (int i = 0; i < rows; i++) {
+			sb.append("\n");
+			for (int j = 0; j < cols; j++) {
+				sb.append(String.valueOf(get(i, j))).append(" ");
+			}
+		}
+		return sb.toString();
 	}
 
 	// private void innerCopy(int src, int dest, int length)
@@ -345,22 +372,8 @@ public class Matrix {
 	// }
 	// }
 
-	private void innerMove(int src, int length, int dierction, int step) {
-		if (dierction > 0) {
-			for (int i = src + length - 1; i >= src; i--) {
-				if (i + step < data.length) {
-					data[i + step] = data[i];
-					data[i] = 0;
-				}
-			}
-		} else {
-			for (int i = src; i < src + length; i++) {
-				if (i < data.length) {
-					data[i - step] = data[i];
-					data[i] = 0;
-				}
-			}
-		}
+	public int volume() {
+		return data.length;
 	}
 
 	// private void innerClear(int from, int to)

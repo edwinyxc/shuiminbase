@@ -26,7 +26,7 @@ public class MatrixSubList {
 
 	public int getSize()
 	{
-		int[] ap = root_m.getRow(this.row);
+		int[] ap = root_m.row(this.row);
 		return ap[1] - ap[0];
 	}
 
@@ -59,7 +59,7 @@ public class MatrixSubList {
 
 	private int[] getAp()
 	{
-		int[] ret = root_m.getRow(row);
+		int[] ret = root_m.row(row);
 		return ret;
 	}
 
@@ -84,7 +84,7 @@ public class MatrixSubList {
 	{
 		if (row > 0 && row < root_m.rows()) {
 			return reified(
-				root_m.getRow(row));
+				root_m.row(row));
 		}
 		return null;
 	}
@@ -191,7 +191,7 @@ public class MatrixSubList {
 	{
 		int[] ap;
 		for (int r = 0; r < root_m.rows(); r++) {
-			ap = root_m.getRow(r);
+			ap = root_m.row(r);
 			/*assert ap[0] < ap[1]*/
 			if (cur < ap[0]) {
 				root_m.set(r, 0, ap[0] + mod);

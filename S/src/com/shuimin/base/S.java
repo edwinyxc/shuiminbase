@@ -403,7 +403,7 @@ public class S {
 			for (int i = 0; i < some.length; i++) {
 				Matrix x = some[i];
 				for (int h = 0; h < x.rows(); h++) {
-					int[] row = x.getRow(h);
+					int[] row = x.row(h);
 					for (int _ = 0; _ < row.length; _++) {
 						out[h][colfix + _] = (char) row[_];
 					}
@@ -413,23 +413,7 @@ public class S {
 			return new Matrix(out);
 		}
 
-		public static Matrix fromRow(String... strx) {
-			int length = 0;
-			for (int i = 0; i < strx.length; i++) {
-				length += strx[i].length();
-			}
-			int[] ret = new int[length];
-			int idx = 0;
-			for (int i = 0; i < strx.length; i++) {
-				char[] charArr = strx[i].toCharArray();
-				for (int j = 0; j < charArr.length; j++) {
-					ret[idx++] = charArr[j];
-				}
-			}
-			return new Matrix(ret);
-		}
-
-		public static Matrix fromRows(String[] s) {
+		public static Matrix fromString(String... s) {
 
 			final int maxLen = ((String) new FArray<String>(s)
 					.reduceLeft(new F2<String, String, String>() {

@@ -32,7 +32,7 @@ public class RichLayout {
 		for (int i = 0; i < some.length; i++) {
 			Rect x = some[i];
 			for (int h = 0; h < x.height; h++) {
-				int[] row = x.data.getRow(h);
+				int[] row = x.data.row(h);
 				for (int _ = 0; _ < row.length; _++) {
 					out[h][colfix + _] = (char) row[_];
 				}
