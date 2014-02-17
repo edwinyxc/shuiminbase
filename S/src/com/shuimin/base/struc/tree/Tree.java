@@ -3,10 +3,9 @@ package com.shuimin.base.struc.tree;
 import java.util.Iterator;
 import java.util.List;
 
+import com.shuimin.base.F;
 import com.shuimin.base.abs.Attrs;
 import com.shuimin.base.abs.Namable;
-import com.shuimin.base.f.F;
-
 public interface Tree<T> extends Namable<Tree<T>>, Attrs<Tree<T>> {
 
 	/**

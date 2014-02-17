@@ -10,12 +10,11 @@ import java.util.Queue;
 import java.util.Stack;
 import java.util.TreeMap;
 
+import com.shuimin.base.CB;
+import com.shuimin.base.F;
+import com.shuimin.base.F2;
+import com.shuimin.base.FArray;
 import com.shuimin.base.S;
-import com.shuimin.base.f.CB;
-import com.shuimin.base.f.F;
-import com.shuimin.base.f.F2;
-import com.shuimin.base.f.FArray;
-import com.shuimin.base.f.For;
 import com.shuimin.base.struc.Matrix;
 import com.shuimin.base.util.cui.Rect;
 import com.shuimin.base.util.cui.RichLayout;
@@ -282,7 +281,7 @@ public class TinyTree<E> implements Tree<E> {
 	private Matrix _lines() {
 		final Matrix view = S.matrix.console(120);
 		view.addRow(S.matrix.fromString(this.name()).row(0));
-		new For(children()).each(new CB<Tree<E>>() {
+		S.For(children()).each(new CB<Tree<E>>() {
 			@Override
 			public void f(Tree<E> t) {
 				String prefix = "┣━━";
@@ -347,7 +346,8 @@ public class TinyTree<E> implements Tree<E> {
 
 	public String[] path() {
 		return new FArray<String>(
-				new For(parents()).map(new F<String, Tree<E>>() {
+				
+				S.For(parents()).map(new F<String, Tree<E>>() {
 					@Override
 					public String f(Tree<E> a) {
 						return a.name();

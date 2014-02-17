@@ -1,8 +1,8 @@
 package com.shuimin.base.util.cui;
 
+import com.shuimin.base.F2;
+import com.shuimin.base.FArray;
 import com.shuimin.base.S;
-import com.shuimin.base.f.F2;
-import com.shuimin.base.f.FArray;
 import com.shuimin.base.struc.Matrix;
 
 public class RichLayout {

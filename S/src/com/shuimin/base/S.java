@@ -17,10 +17,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
-import com.shuimin.base.f.F2;
-import com.shuimin.base.f.FArray;
 import com.shuimin.base.struc.Matrix;
 import com.shuimin.base.util.cui.Rect;
 import com.shuimin.base.util.logger.Logger;
@@ -39,7 +38,37 @@ public class S {
 	}
 
 	/******************** A ****************/
+
+	public static <T> FArray<T> Array() {
+		return new FArray<T>();
+	}
+
+	public static <T> FArray<T> Array(T[] t) {
+		return new FArray<T>(t);
+	}
+
+	public static <T> FArray<T> Array(Iterable<T> t) {
+		return new FArray<T>(t);
+	}
+
+	public static <T> FArray<T> Array(List<T> t) {
+		return new FArray<T>(t);
+	}
+
 	public static class array {
+		@SuppressWarnings("unchecked")
+		public static <T> T[] of(Object[] arr) {
+			if (arr.length == 0)
+				return (T[]) arr;
+			Class<?> tClass = arr[0].getClass();
+			Object array = java.lang.reflect.Array.newInstance(tClass,
+					arr.length);
+			for (int i = 0; i < arr.length; i++) {
+				java.lang.reflect.Array.set(array, i, arr[i]);
+			}
+			return (T[]) array;
+		}
+
 		/**
 		 * check if an array contains something
 		 * 
@@ -182,12 +211,20 @@ public class S {
 
 	/******************* B *********************/
 	/******************* C *********************/
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	// @SuppressWarnings({ "rawtypes", "unchecked" })
 	public static class collection {
 		public static class set {
-			public static HashSet hashSet(Object[] arr) {
-				final HashSet ret = new HashSet();
-				for (Object t : arr) {
+			public static <E> HashSet<E> hashSet(Iterable<E> arr) {
+				final HashSet<E> ret = new HashSet<E>();
+				for (E t : arr) {
+					ret.add(t);
+				}
+				return ret;
+			}
+
+			public static <E> HashSet<E> hashSet(E[] arr) {
+				final HashSet<E> ret = new HashSet<E>();
+				for (E t : arr) {
 					ret.add(t);
 				}
 				return ret;
@@ -195,17 +232,33 @@ public class S {
 		}
 
 		public static class list {
-			public ArrayList arrayList(Object[] arr) {
-				final ArrayList ret = new ArrayList();
-				for (Object t : arr) {
+			public <E> ArrayList<E> arrayList(Iterable<E> arr) {
+				final ArrayList<E> ret = new ArrayList<E>();
+				for (E t : arr) {
 					ret.add(t);
 				}
 				return ret;
 			}
 
-			public LinkedList linkedList(Object[] arr) {
-				final LinkedList ret = new LinkedList();
-				for (Object t : arr) {
+			public <E> ArrayList<E> arrayList(E[] arr) {
+				final ArrayList<E> ret = new ArrayList<E>();
+				for (E t : arr) {
+					ret.add(t);
+				}
+				return ret;
+			}
+
+			public <E> LinkedList<E> linkedList(Iterable<E> arr) {
+				final LinkedList<E> ret = new LinkedList<E>();
+				for (E t : arr) {
+					ret.add(t);
+				}
+				return ret;
+			}
+
+			public <E> LinkedList<E> linkedList(E[] arr) {
+				final LinkedList<E> ret = new LinkedList<E>();
+				for (E t : arr) {
 					ret.add(t);
 				}
 				return ret;
@@ -274,6 +327,19 @@ public class S {
 	}
 
 	/********************* F ***********************/
+
+	public static <T> For<T> For(Iterable<T> iterable) {
+		return new For<T>(iterable);
+	}
+
+	public static <T> For<T> For(T[] t) {
+		return new For<T>(t);
+	}
+
+	public static <T> For<T> For(Map<?, T> map) {
+		return new For<T>(map);
+	}
+
 	public static class file {
 		/**
 		 * 
@@ -343,6 +409,14 @@ public class S {
 	/********************* K ***********************/
 	/********************* L ***********************/
 	/********************* M ***********************/
+	final static public <T> Many<T> many(T[] t) {
+		return Result.many(t);
+	}
+
+	final static public <T> Many<T> many(Iterable<T> t) {
+		return Result.many(t);
+	}
+
 	public static class math {
 		public static int max(int a, int b) {
 			return a > b ? a : b;
@@ -361,13 +435,16 @@ public class S {
 	}
 
 	public static class matrix {
-		
-		public static Matrix console(int maxLength){
-			return new Matrix(0,maxLength);
+
+		public static Matrix console(int maxLength) {
+			return new Matrix(0, maxLength);
 		}
-		
+
 		/**
-		 * <p>Print a matrix whose each row as a String.</p> 
+		 * <p>
+		 * Print a matrix whose each row as a String.
+		 * </p>
+		 * 
 		 * @param r
 		 * @return
 		 */
@@ -437,8 +514,19 @@ public class S {
 
 	/********************* N ***********************/
 	/********************* O ***********************/
+	final static public <T> One<T> one(T t) {
+		return Result.one(t);
+	}
+
 	/********************* P ***********************/
+
+	final static public <L, R> Pair<L, R> pair(L l, R r) {
+		return Result.pair(l, r);
+	}
+
 	public static class path {
+		private static String webRoot;
+
 		public static String rootAbsPath(Object caller) {
 			return caller.getClass().getClassLoader().getResource("/")
 					.getPath();
@@ -447,6 +535,61 @@ public class S {
 		public static String rootAbsPath(Class<?> callerClass) {
 			return callerClass.getClassLoader().getResource("/").getPath();
 		}
+
+		@SuppressWarnings("rawtypes")
+		public static String get(Class clazz) {
+			String path = clazz.getResource("").getPath();
+			return new File(path).getAbsolutePath();
+		}
+
+		public static String get(Object object) {
+			String path = object.getClass().getResource("").getPath();
+			return new File(path).getAbsolutePath();
+		}
+
+		public static String rootClassPath() {
+			try {
+				String path = S.class.getClassLoader().getResource("").toURI()
+						.getPath();
+				return new File(path).getAbsolutePath();
+			} catch (Exception e) {
+				String path = S.class.getClassLoader().getResource("")
+						.getPath();
+				return new File(path).getAbsolutePath();
+			}
+		}
+
+		public static String packageOf(Object object) {
+			Package p = object.getClass().getPackage();
+			return p != null ? p.getName().replaceAll("\\.", "/") : "";
+		}
+
+		public static String webRoot() {
+			if (webRoot == null)
+				webRoot = detectWebRootPath();
+			return webRoot;
+		}
+
+		public static void webRoot(String webRootPath) {
+			if (webRootPath == null)
+				return;
+
+			if (webRootPath.endsWith(File.separator))
+				webRootPath = webRootPath
+						.substring(0, webRootPath.length() - 1);
+			S.path.webRoot = webRootPath;
+		}
+
+		private static String detectWebRootPath() {
+			try {
+				String path = S.class.getResource("/").toURI().getPath();
+				return new File(path).getParentFile().getParentFile()
+						.getCanonicalPath();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
 	}
 
 	public static class parse {

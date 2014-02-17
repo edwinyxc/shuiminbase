@@ -1,6 +1,8 @@
 package com.shuimin.base;
-
 public class Test {
-	public static void main() {
+	static void test(){
+		S.one("Sdd");
+	}
+	public static void main(String s) {
 	}
 }
