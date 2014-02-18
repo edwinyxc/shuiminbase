@@ -34,14 +34,6 @@ public class FArray<T> extends ArrayList<T> {
 		}
 	}
 
-	public FArray(For<T> _for) {
-		super();
-		final Iterator<T> it = _for.<T>val().iterator();
-		while (it.hasNext()) {
-			this.add(it.next());
-		}
-	}
-
 	public FArray(int i) {
 		super(i);
 	}

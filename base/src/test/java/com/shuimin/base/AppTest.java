@@ -1,8 +1,7 @@
 package com.shuimin.base;
 
-import junit.framework.Test;
 import static com.shuimin.base.S.echo;
-import static com.shuimin.base.S.For;
+import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
@@ -32,7 +31,7 @@ public class AppTest extends TestCase {
 	 */
 	public void testApp() {
 
-		For(new String[] { "a", "b", "c" })
+		S._for(new String[] { "a", "b", "c" })
 				.<Integer> map(new F<Integer, String>() {
 
 					@Override
@@ -51,6 +50,7 @@ public class AppTest extends TestCase {
 					@Override
 					public void f(Integer t) {
 						echo(t);
+			
 					}
 
 				});

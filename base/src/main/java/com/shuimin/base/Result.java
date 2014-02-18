@@ -2,7 +2,22 @@ package com.shuimin.base;
 
 import java.util.Set;
 
-abstract class Result {
+public abstract class Result {
+	
+	@SuppressWarnings("unchecked")
+	public static <T> Result of(Object o){
+		
+		if(o == null)
+			return Result.<T>one(null);
+		Class<?> c = o.getClass(); 
+		if(c.isArray()){
+			return Result.<T>many((T[])o);
+		}
+		if(o instanceof Iterable){
+			return Result.<T>many((Iterable<T>)o);
+		}
+		return Result.<T>one((T)o);
+	}
 
 	final static public <T> One<T> instanceOf(Class<T> clazz)
 			throws InstantiationException, IllegalAccessException {

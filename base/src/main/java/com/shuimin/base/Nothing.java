@@ -1,6 +1,8 @@
-package com.shuimin.base.struc;
+package com.shuimin.base;
 
 import java.util.Iterator;
+
+import com.shuimin.base.struc.NullIterator;
 
 @SuppressWarnings("rawtypes")
 public final class Nothing implements Iterable {
@@ -21,5 +23,5 @@ public final class Nothing implements Iterable {
 	public Iterator iterator() {
 		return nut;
 	}
-
+	
 }

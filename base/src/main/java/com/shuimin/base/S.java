@@ -25,6 +25,7 @@ import com.shuimin.base.util.cui.Rect;
 import com.shuimin.base.util.logger.Logger;
 
 public class S {
+
 	/******************* logger ******************/
 	private final static Logger logger = Logger.getDefault();
 
@@ -33,9 +34,63 @@ public class S {
 	}
 
 	/******************* meta ******************/
+	public static final String author() {
+		return " edwinyxc@gmail.com ";
+	}
+
 	public static final String version() {
 		return "v0.0.1 2014";
 	}
+
+	/******************* _ ******************/
+	public static void _assert(boolean a, String err) {
+		if (a)
+			return;
+		throw new RuntimeException(err);
+	}
+
+	public static <T> T _fail() {
+		throw new RuntimeException("BUG OCCUR, CONTACT ME:" + author());
+	}
+
+	public static <T> T _fail(String err){
+		throw new RuntimeException(err);
+	}
+
+	public static <T> T _notNull(T t) {
+		_assert(t, "noNull assert failure");
+		return t;
+	}
+
+	public static <T> T _notNull(T t, String err) {
+		_assert(t, err);
+		return t;
+	}
+	
+	public static <T> ForIt<T> _for(Iterable<T> iterable) {
+		return For.<T>_(iterable);
+	}
+
+	public static <T> ForIt<T> _for(T[] t) {
+		return For.<T>_(t);
+	}
+
+	public static <K, V> ForMap<K,V> _for(Map<K, V> map) {
+		return For.<K,V>_(map);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T _one(Class<?> clazz){
+		try {
+			return (T) clazz.newInstance();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 
 	/******************** A ****************/
 
@@ -56,6 +111,15 @@ public class S {
 	}
 
 	public static class array {
+
+		public static <T> Iterable<T> to(T[] arr) {
+			return new FArray<T>(arr);
+		}
+		
+		public static <T> T[] of(Iterable<T> iterable) {
+			return S._for(iterable).join();
+		}
+
 		@SuppressWarnings("unchecked")
 		public static <T> T[] of(Object[] arr) {
 			if (arr.length == 0)
@@ -171,12 +235,6 @@ public class S {
 			return array;
 		}
 
-	}
-
-	public static void _assert(boolean a, String err) {
-		if (a)
-			return;
-		throw new RuntimeException(err);
 	}
 
 	/**
@@ -327,19 +385,7 @@ public class S {
 	}
 
 	/********************* F ***********************/
-
-	public static <T> For<T> For(Iterable<T> iterable) {
-		return new For<T>(iterable);
-	}
-
-	public static <T> For<T> For(T[] t) {
-		return new For<T>(t);
-	}
-
-	public static <T> For<T> For(Map<?, T> map) {
-		return new For<T>(map);
-	}
-
+	
 	public static class file {
 		/**
 		 * 
@@ -423,12 +469,13 @@ public class S {
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static class map {
-		public HashMap hashMap(Object[][] kv) {
-			HashMap ret = new HashMap();
+		@SuppressWarnings("unchecked")
+		public static <K, V> HashMap<K, V> hashMap(Object[][] kv) {
+			HashMap<K, V> ret = new HashMap<K, V>();
 			for (Object[] entry : kv) {
-				ret.put(entry[0], entry[1]);
+				if (entry.length >= 2)
+					ret.put((K) entry[0], (V) entry[1]);
 			}
 			return ret;
 		}

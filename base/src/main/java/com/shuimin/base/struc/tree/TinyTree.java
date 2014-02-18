@@ -281,18 +281,23 @@ public class TinyTree<E> implements Tree<E> {
 	private Matrix _lines() {
 		final Matrix view = S.matrix.console(120);
 		view.addRow(S.matrix.fromString(this.name()).row(0));
-		S.For(children()).each(new CB<Tree<E>>() {
+		S._for(children()).each(new CB<Tree<E>>() {
 			@Override
 			public void f(Tree<E> t) {
 				String prefix = "┣━━";
-				if (t.isLast())prefix = "┗━━";
-				view.addRows(t.isLeaf() ? 
-						S.matrix.fromString(new String[] { prefix, t.name() })
-						: S.matrix.addHorizontal(S.matrix.fromString(prefix),((TinyTree<E>) t)._lines()));
+				if (t.isLast())
+					prefix = "┗━━";
+				view.addRows(t.isLeaf() ? S.matrix.fromString(new String[] {
+						prefix, t.name() })
+						: S.matrix.addHorizontal(S.matrix.fromString(prefix),
+								((TinyTree<E>) t)._lines()));
 				for (int i = 1; i < view.rows(); i++) {
-					if (view.get(i, 0) == '┗') break;
-					else if (view.get(i, 0) == '┣')continue;
-					else view.set(i, 0, (int) '┃');
+					if (view.get(i, 0) == '┗')
+						break;
+					else if (view.get(i, 0) == '┣')
+						continue;
+					else
+						view.set(i, 0, (int) '┃');
 				}
 			}
 		});
@@ -345,14 +350,12 @@ public class TinyTree<E> implements Tree<E> {
 	}
 
 	public String[] path() {
-		return new FArray<String>(
-				
-				S.For(parents()).map(new F<String, Tree<E>>() {
-					@Override
-					public String f(Tree<E> a) {
-						return a.name();
-					}
-				})).toArray(new String[0]);
+		return S._for(parents()).map(new F<String, Tree<E>>() {
+			@Override
+			public String f(Tree<E> a) {
+				return a.name();
+			}
+		}).join();
 	}
 
 	@Override
