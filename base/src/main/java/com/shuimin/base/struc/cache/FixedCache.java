@@ -1,12 +1,10 @@
 package com.shuimin.base.struc.cache;
 
-import java.util.HashMap;
 
+public final class FixedCache<K,V> extends AbstractCache<K, V>{
 
-public final class DefaultCache<K,V> extends AbstractCache<K, V>{
-
-	public DefaultCache() {
-		super(new HashMap<K,V>());
+	public FixedCache(int maxEntries) {
+		super(new FixedSizeLinkedHashMap<K,V>(maxEntries));
 	}
 
 	@SuppressWarnings("unchecked")

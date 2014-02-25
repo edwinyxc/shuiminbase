@@ -1,7 +1,7 @@
 package com.shuimin.base.util.cui;
 
-import com.shuimin.base.F0;
 import com.shuimin.base.S;
+import com.shuimin.base.S.function.Function0;
 import com.shuimin.base.struc.Matrix;
 
 public class Rect {
@@ -24,7 +24,7 @@ public class Rect {
 	}
 
 	public Rect(final String[] str, int width, int height) {
-		this.width = S.math.max(new F0<Integer>() {
+		this.width = S.math.max(new Function0<Integer>() {
 
 			public Integer f() {
 				int maxLen = 0;

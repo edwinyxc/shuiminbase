@@ -10,11 +10,9 @@ import java.util.Queue;
 import java.util.Stack;
 import java.util.TreeMap;
 
-import com.shuimin.base.CB;
-import com.shuimin.base.F;
-import com.shuimin.base.F2;
-import com.shuimin.base.FArray;
 import com.shuimin.base.S;
+import com.shuimin.base.S.function.Callback;
+import com.shuimin.base.S.function.Function;
 import com.shuimin.base.struc.Matrix;
 import com.shuimin.base.util.cui.Rect;
 import com.shuimin.base.util.cui.RichLayout;
@@ -221,7 +219,7 @@ public class TinyTree<E> implements Tree<E> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Tree<E> find(F<Boolean, Tree<E>> findFunc) {
+	public Tree<E> find(Function<Boolean, Tree<E>> findFunc) {
 		Iterator<Tree<E>> bfs = this.bfs();
 		while (bfs.hasNext()) {
 			final Tree<E> node = bfs.next();
@@ -279,9 +277,9 @@ public class TinyTree<E> implements Tree<E> {
 	}
 
 	private Matrix _lines() {
-		final Matrix view = S.matrix.console(120);
+		final Matrix view = S.matrix.console(255);
 		view.addRow(S.matrix.fromString(this.name()).row(0));
-		S._for(children()).each(new CB<Tree<E>>() {
+		S._for(children()).each(new Callback<Tree<E>>() {
 			@Override
 			public void f(Tree<E> t) {
 				String prefix = "┣━━";
@@ -329,7 +327,7 @@ public class TinyTree<E> implements Tree<E> {
 
 	@Override
 	public List<Tree<E>> nextAll() {
-		return new FArray<Tree<E>>(parent.children()).slice(idxInParent + 1,
+		return S.list.<Tree<E>> one(parent.children()).slice(idxInParent + 1,
 				parent.children().size());
 	}
 
@@ -350,7 +348,7 @@ public class TinyTree<E> implements Tree<E> {
 	}
 
 	public String[] path() {
-		return S._for(parents()).map(new F<String, Tree<E>>() {
+		return S._for(parents()).map(new Function<String, Tree<E>>() {
 			@Override
 			public String f(Tree<E> a) {
 				return a.name();
@@ -365,7 +363,7 @@ public class TinyTree<E> implements Tree<E> {
 
 	@Override
 	public List<Tree<E>> prevAll() {
-		return new FArray<Tree<E>>(parent.children()).slice(0, idxInParent);
+		return S.list.<Tree<E>> one(parent.children()).slice(0, idxInParent);
 	}
 
 	@Override
@@ -401,30 +399,17 @@ public class TinyTree<E> implements Tree<E> {
 
 	@Override
 	public Tree<E> select(String[] name) {
-		Tree<E> searchResult = this;
+		Tree<E> cur = this;
 		int i = 0;
 		while (i < name.length) {
-			searchResult = new F2<Tree<E>, Tree<E>, String>() {
-
-				@Override
-				public Tree<E> f(Tree<E> node, String name) {
-					S._assert(node, "node null");
-					Selector<Tree<E>> selector = node.selector();
-					S._assert(selector, "selector null");
-					Tree<E> _node = selector.select(name);
-					return _node;
-				}
-
-			}.f(searchResult, (String) name[i]);
-
-			if (searchResult == null) {
+			cur = cur.select(name[i++]);
+			if (cur == null) {
 				return null;
 			}
-			i++;
 		}
-		if (searchResult == this)
+		if (cur == this)
 			return null;
-		return searchResult;
+		return cur;
 	}
 
 	@Override

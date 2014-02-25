@@ -3,7 +3,7 @@ package com.shuimin.base.struc.tree;
 import java.util.Iterator;
 import java.util.List;
 
-import com.shuimin.base.F;
+import com.shuimin.base.S.function.Function;
 import com.shuimin.base.abs.Attrs;
 import com.shuimin.base.abs.Namable;
 public interface Tree<T> extends Namable<Tree<T>>, Attrs<Tree<T>> {
@@ -118,7 +118,7 @@ public interface Tree<T> extends Namable<Tree<T>>, Attrs<Tree<T>> {
 	 * @param findFunc
 	 * @return
 	 */
-	Tree<T> find(F<Boolean, Tree<T>> findFunc);
+	Tree<T> find(Function<Boolean, Tree<T>> findFunc);
 
 	/**
 	 * <p>

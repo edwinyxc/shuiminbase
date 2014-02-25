@@ -3,9 +3,10 @@ package com.shuimin.base.struc;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
-import com.shuimin.base.CB2;
-import com.shuimin.base.F;
+import com.shuimin.base.S.function.Callback2;
+import com.shuimin.base.S.function.Function;
 import com.shuimin.base.struc.cache.DefaultCache;
+import com.shuimin.base.struc.cache.FixedCache;
 import com.shuimin.base.struc.cache.LRUCache;
 
 public abstract class Cache<K, V> {
@@ -28,7 +29,7 @@ public abstract class Cache<K, V> {
 	 * @param doWithVal
 	 * @return
 	 */
-	public abstract V get(K key, F<V, V> doWhenEmpty);
+	public abstract V get(K key, Function<V, V> doWhenEmpty);
 
 	/**
 	 * <p>
@@ -49,15 +50,19 @@ public abstract class Cache<K, V> {
 
 	public abstract ConcurrentMap<K, V> asMap();
 
-	public abstract Cache<K, V> onNothingFound(F<V, K> nothingFoundLisener);
+	public abstract Cache<K, V> onNotFound(Function<V, K> nothingFoundLisener);
 
-	public abstract Cache<K, V> onRemove(CB2<K, V> removeListener);
+	public abstract Cache<K, V> onRemove(Callback2<K, V> removeListener);
 
 	public static <K, V> Cache<K, V> lruCache(int max) {
 		return new LRUCache<K, V>(max);
 	}
 
-	public static <K, V> Cache<K, V> defaultCache(int max) {
-		return new DefaultCache<K,V>(max);
+	public static <K, V> Cache<K, V> fixedCache(int max) {
+		return new FixedCache<K, V>(max);
+	}
+
+	public static <K, V> Cache<K, V> defaultCache() {
+		return new DefaultCache<K, V>();
 	}
 }

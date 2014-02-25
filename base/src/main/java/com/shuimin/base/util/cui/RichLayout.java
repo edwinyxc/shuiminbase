@@ -1,8 +1,8 @@
 package com.shuimin.base.util.cui;
 
-import com.shuimin.base.F2;
-import com.shuimin.base.FArray;
 import com.shuimin.base.S;
+import com.shuimin.base.S.function.Function2;
+import com.shuimin.base.S.list;
 import com.shuimin.base.struc.Matrix;
 
 public class RichLayout {
@@ -56,10 +56,9 @@ public class RichLayout {
 
 	public static void main(String[] args) {
 
-		FArray<Integer> arr = new FArray<Integer>(new Integer[] { 1, 1, 2, 3,
-				4, 2, 5 });
-		final int max =  arr
-				.reduceLeft(new F2<Integer, Integer, Integer>() {
+		final int max =  list.<Integer>one(new Integer[] { 1, 1, 2, 3,
+				4, 2, 5 })
+				.reduceLeft(new Function2<Integer, Integer, Integer>() {
 					public Integer f(Integer a, Integer b) {
 						return S.math.max(a, b);
 					}
