@@ -84,7 +84,7 @@ public interface Tree<T> extends Namable<Tree<T>>, Attrs<Tree<T>> {
 
 	/**
 	 * <p>
-	 * return its parent node, if not found,return empty tree
+	 * return its parent node, if not found,return null
 	 * </p>
 	 * 
 	 * @return
@@ -133,7 +133,7 @@ public interface Tree<T> extends Namable<Tree<T>>, Attrs<Tree<T>> {
 	/**
 	 * <p>
 	 * Recursively call select(name) using the parameter array, return the
-	 * latest found. If no one was satisfied, return an empty Tree.
+	 * latest found. If no one was satisfied, return null.
 	 * </p>
 	 * 
 	 * @param name

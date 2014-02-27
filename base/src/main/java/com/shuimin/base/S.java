@@ -57,6 +57,10 @@ public class S {
 	}
 
 	/******************* _ ******************/
+	
+	public static void _assert(boolean b) {
+		_assert(b,"assert failure,somthing wrong");
+	}
 
 	public static void _assert(boolean a, String err) {
 		if (a)
@@ -74,7 +78,7 @@ public class S {
 		throw new RuntimeException(err);
 	}
 
-	public static <T> T _maybeNull(T t, Class<T> clazz) {
+	public static <T> T _avoidNull(T t, Class<T> clazz) {
 		if (t == null) {
 			return (T) nothing.of(clazz);// TODO possible to remove the second argument
 		}
@@ -961,7 +965,7 @@ public class S {
 
 				@Override
 				public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-					return _maybeNull(_mm.get(method.getName()), Function.class).f(args);
+					return _avoidNull(_mm.get(method.getName()), Function.class).f(args);
 				}
 
 			});

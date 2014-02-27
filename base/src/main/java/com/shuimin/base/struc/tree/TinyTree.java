@@ -101,11 +101,6 @@ public class TinyTree<E> implements Tree<E> {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
-	public final static Tree emptyTree() {
-		return new TinyTree();
-	}
-
 	private final Map<String, Object> attrs = new TreeMap<String, Object>();
 
 	private int idxInParent = -1;
@@ -217,7 +212,6 @@ public class TinyTree<E> implements Tree<E> {
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Tree<E> find(Function<Boolean, Tree<E>> findFunc) {
 		Iterator<Tree<E>> bfs = this.bfs();
@@ -226,11 +220,10 @@ public class TinyTree<E> implements Tree<E> {
 			if (findFunc.f(node))
 				return node;
 		}
-		return emptyTree();
+		return null;
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Tree<E> find(String name) {
 		Iterator<Tree<E>> bfs = this.bfs();
@@ -239,7 +232,7 @@ public class TinyTree<E> implements Tree<E> {
 			if (name.equals(node.name()))
 				return node;
 		}
-		return emptyTree();
+		return null;
 	}
 
 	@Override
