@@ -111,7 +111,7 @@ public class TinyTree<E> implements Tree<E> {
 
 	private Tree<E> parent;
 
-	private Tree<E> root;
+	private Tree<E> root = this;
 
 	protected Selector<Tree<E>> selector = new Selector<Tree<E>>() {
 		@Override
@@ -128,7 +128,7 @@ public class TinyTree<E> implements Tree<E> {
 
 	};
 
-	public TinyTree() {
+	protected TinyTree() {
 	}
 
 	public TinyTree(E root) {
@@ -397,7 +397,7 @@ public class TinyTree<E> implements Tree<E> {
 		while (i < name.length) {
 			cur = cur.select(name[i++]);
 			if (cur == null) {
-				return null;
+				break;
 			}
 		}
 		if (cur == this)
@@ -427,8 +427,9 @@ public class TinyTree<E> implements Tree<E> {
 		long s = S.time();
 		String ret = "\n" + RichLayout.mkStr(new Rect(_lines()));
 		long e = S.time();
-		S.echo((e - s) + "ms");
-		return ret;
+		
+//		S.echo((e - s) + "ms");
+		return ret+"\nrendered in"+(e-s)+" ms";
 
 		// /*"┏┣┗━━━ "*/
 		// Iterator<Tree<E>> iter = this.dfs();

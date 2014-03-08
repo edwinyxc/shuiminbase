@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -57,15 +58,19 @@ public class S {
 	}
 
 	/******************* _ ******************/
-	
+
 	public static void _assert(boolean b) {
-		_assert(b,"assert failure,somthing wrong");
+		_assert(b, "assert failure,somthing wrong");
 	}
 
 	public static void _assert(boolean a, String err) {
 		if (a)
 			return;
 		throw new RuntimeException(err);
+	}
+
+	public static void _lazyThrow(Throwable a) {
+		throw new RuntimeException(a);
 	}
 
 	// public static <T> _ord(,T t){}
@@ -80,7 +85,8 @@ public class S {
 
 	public static <T> T _avoidNull(T t, Class<T> clazz) {
 		if (t == null) {
-			return (T) nothing.of(clazz);// TODO possible to remove the second argument
+			return (T) nothing.of(clazz);// TODO possible to remove the second
+											// argument
 		}
 		return t;
 	}
@@ -116,16 +122,8 @@ public class S {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> T _one(Class<?> clazz) {
-
-		try {
-			return (T) clazz.newInstance();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
-		return null;
+	public static <T> T _one(Class<?> clazz) throws InstantiationException, IllegalAccessException {
+		return (T) clazz.newInstance();
 	}
 
 	/******************** A ****************/
@@ -409,8 +407,7 @@ public class S {
 		}
 
 		public ForMap<K, V> grep(Function<Boolean, Entry<K, V>> grepFunc) {
-			Class<?> mapClass = map.getClass();
-			Map<K, V> newm = S.<Map<K, V>> _one(mapClass);
+			Map<K, V> newm = S.map.hashMap(null);
 			for (Entry<K, V> entry : map.entrySet()) {
 				if (grepFunc.f(entry))
 					newm.put(entry.getKey(), entry.getValue());
@@ -419,8 +416,7 @@ public class S {
 		}
 
 		public ForMap<K, V> grepByKey(Function<Boolean, K> grepFunc) {
-			Class<?> mapClass = map.getClass();
-			Map<K, V> newm = S.<Map<K, V>> _one(mapClass);
+			Map<K, V> newm = S.map.hashMap(null);
 			for (Entry<K, V> entry : map.entrySet()) {
 				if (grepFunc.f(entry.getKey()))
 					newm.put(entry.getKey(), entry.getValue());
@@ -429,8 +425,7 @@ public class S {
 		}
 
 		public ForMap<K, V> grepByValue(Function<Boolean, V> grepFunc) {
-			Class<?> mapClass = map.getClass();
-			Map<K, V> newm = S.<Map<K, V>> _one(mapClass);
+			Map<K, V> newm = S.map.hashMap(null);
 			for (Entry<K, V> entry : map.entrySet()) {
 				if (grepFunc.f(entry.getValue()))
 					newm.put(entry.getKey(), entry.getValue());
@@ -443,8 +438,7 @@ public class S {
 		}
 
 		public <R> ForMap<K, R> map(Function<R, V> mapFunc) {
-			Class<?> mapClass = map.getClass();
-			Map<K, R> newm = S.<Map<K, R>> _one(mapClass);
+			Map<K, R> newm = S.map.hashMap(null);
 			for (Entry<K, V> entry : map.entrySet()) {
 				newm.put(entry.getKey(), mapFunc.f(entry.getValue()));
 			}
@@ -482,13 +476,24 @@ public class S {
 			size = e.length;
 		}
 
+		private <R> Collection<R> _initCollection(Class<?> itClass) {
+			Collection<R> re;
+			if (Collection.class.isAssignableFrom(itClass))
+				try {
+					re = _one(itClass);
+				} catch (InstantiationException e) {
+					re = list.one();
+				} catch (IllegalAccessException e) {
+					re = list.one();
+				}
+			else
+				re = list.one();
+			return re;
+		}
+
 		public <R> ForIt<R> map(final Function<R, E> mapper) {
 			final Class<?> itClass = iter.getClass();
-			final Collection<R> result;
-			if (Collection.class.isAssignableFrom(itClass))
-				result = _one(itClass);
-			else
-				result = list.one();
+			final Collection<R> result = _initCollection(itClass);
 			each(new Callback<E>() {
 				public void f(E element) {
 					result.add(mapper.f(element));
@@ -509,11 +514,7 @@ public class S {
 
 		public ForIt<E> grep(final Function<Boolean, E> grepFunc) {
 			final Class<?> itClass = iter.getClass();
-			final Collection<E> c;
-			if (Collection.class.isAssignableFrom(itClass))
-				c = S.<Collection<E>> _one(itClass);
-			else
-				c = list.one();
+			final Collection<E> c = _initCollection(itClass);
 			each(new Callback<E>() {
 				public void f(E e) {
 					if (grepFunc.f(e))
@@ -529,6 +530,14 @@ public class S {
 
 		public Iterable<E> val() {
 			return iter;
+		}
+
+		public E first() {
+			Iterator<E> it = iter.iterator();
+			if (it.hasNext()) {
+				return it.next();
+			}
+			return null;
 		}
 
 		public E[] join() throws RuntimeException {
@@ -775,6 +784,8 @@ public class S {
 	public static class map {
 		@SuppressWarnings("unchecked")
 		public static <K, V> HashMap<K, V> hashMap(Object[][] kv) {
+			if (kv == null)
+				return new HashMap<K, V>();
 			HashMap<K, V> ret = new HashMap<K, V>();
 			for (Object[] entry : kv) {
 				if (entry.length >= 2)
@@ -867,14 +878,14 @@ public class S {
 
 	final public static class nothing {
 		public final static Boolean _boolean = new Boolean(false);
-		public final static Character _char = new Character((char)'\0');
+		public final static Character _char = new Character((char) '\0');
 		public final static Byte _byte = new Byte((byte) 0);
 		public final static Integer _int = new Integer(0);
-		public final static Short _short = new Short((short) 0);//???
+		public final static Short _short = new Short((short) 0);// ???
 		public final static Long _long = new Long(0);
 		public final static Float _float = new Float(0);
 		public final static Double _double = new Double(0);
-		
+
 		final static Cache<Class<?>, Object> _nothingValues = Cache.<Class<?>, Object> defaultCache().onNotFound(
 				new Function<Object, Class<?>>() {
 
@@ -883,8 +894,7 @@ public class S {
 						return Enhancer.create(_notNull(a), new MethodInterceptor() {
 
 							@Override
-							public Object intercept(Object obj, 
-										Method method, Object[] args, MethodProxy proxy)
+							public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy)
 									throws Throwable {
 								// nothing value must do
 								// nothing;
@@ -894,18 +904,11 @@ public class S {
 						});
 					}
 				});
-		static{
-			
-			_nothingValues.put(String.class,new String(""))
-						.put(Boolean.class,_boolean)
-						.put(Integer.class, _int)
-						.put(Byte.class, _byte)
-						.put(Character.class, _char)
-						.put(Short.class, _short)
-						.put(Long.class, _long)
-						.put(Float.class, _float)
-						.put(Double.class, _double)
-						.put(Object.class, new Object());
+		static {
+
+			_nothingValues.put(String.class, new String("")).put(Boolean.class, _boolean).put(Integer.class, _int)
+					.put(Byte.class, _byte).put(Character.class, _char).put(Short.class, _short).put(Long.class, _long)
+					.put(Float.class, _float).put(Double.class, _double).put(Object.class, new Object());
 		}
 		final private Class<?> proxyClass;
 
@@ -939,7 +942,7 @@ public class S {
 			_t = t;
 		}
 
-		public static <T> proxy<T> one(Class<T> clazz) {
+		public static <T> proxy<T> one(Class<T> clazz) throws InstantiationException, IllegalAccessException {
 			return new proxy<T>(clazz, S.<T> _one(clazz));
 		}
 
@@ -1096,6 +1099,21 @@ public class S {
 
 	public static class str {
 
+	    public static final String NEWLINE;
+
+	    static {
+	        String newLine;
+
+	        try {
+	            newLine = new Formatter().format("%n").toString();
+	        } catch (Exception e) {
+	            newLine = "\n";
+	        }
+
+	        NEWLINE = newLine;
+	    }
+
+
 		public static boolean isBlank(String str) {
 			return str == null || "".equals(str.trim()) ? true : false;
 		}
@@ -1145,6 +1163,42 @@ public class S {
 	}
 
 	/********************* T ***********************/
+	final public static class Tuple<A, B> {
+		public A a;
+		public B b;
+
+		public Tuple(A a, B b) {
+			this.a = a;
+			this.b = b;
+		}
+	}
+
+	final public static class Tuple3<A, B, C> {
+		public A a;
+		public B b;
+		public C c;
+
+		public Tuple3(A a, B b, C c) {
+			this.a = a;
+			this.b = b;
+			this.c = c;
+		}
+	}
+
+	final public static class Tuple4<A, B, C, D> {
+		public A a;
+		public B b;
+		public C c;
+		public D d;
+
+		public Tuple4(A a, B b, C c, D d) {
+			this.a = a;
+			this.b = b;
+			this.c = c;
+			this.d = d;
+		}
+	}
+
 	public static long time() {
 		return System.currentTimeMillis();
 	}
