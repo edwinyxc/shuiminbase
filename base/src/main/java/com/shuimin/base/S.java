@@ -6,6 +6,8 @@
  */
 package com.shuimin.base;
 
+import com.shuimin.base.f.Callback;
+import com.shuimin.base.f.Function;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,9 +33,6 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
-import com.shuimin.base.S.function.Callback;
-import com.shuimin.base.S.function.Function;
-import com.shuimin.base.S.function.Function2;
 import com.shuimin.base.f.None;
 import com.shuimin.base.f.Option;
 import com.shuimin.base.f.Some;
@@ -42,6 +41,8 @@ import com.shuimin.base.struc.IterableEnumeration;
 import com.shuimin.base.struc.Matrix;
 import com.shuimin.base.util.cui.Rect;
 import com.shuimin.base.util.logger.Logger;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 
 public class S {
 
@@ -57,6 +58,10 @@ public class S {
     /**
      * ***************** meta *****************
      */
+    /**
+     *
+     * @return
+     */
     public static final String author() {
         return " edwinyxc@gmail.com ";
     }
@@ -68,8 +73,14 @@ public class S {
     /**
      * ***************** _ *****************
      */
+    /**
+     *
+     * @param <T>
+     * @param t
+     * @return
+     */
     public static <T> Some<T> _some(T t) {
-        return Option.<T>some(t);
+        return Option.some(t);
     }
 
     public static <T> None<T> _none() {
@@ -91,7 +102,7 @@ public class S {
         throw new RuntimeException(a);
     }
 
-	// public static <T> _ord(,T t){}
+    // public static <T> _ord(,T t){}
     public static <T> T _fail() {
         throw new RuntimeException("BUG OCCUR, CONTACT ME:" + author());
     }
@@ -153,7 +164,20 @@ public class S {
         }
 
         public static <T> T[] of(Iterable<T> iterable) {
-            return S._for(iterable).join();
+            List<T> tmp = new LinkedList<T>();
+            for (T e : iterable) {
+                tmp.add(e);
+            }
+            return of(tmp.toArray());
+//            return S.array.of(tmp.toArray());
+        }
+
+        public static <T> T[] of(Enumeration<T> enume) {
+            List<T> tmp = new LinkedList<T>();
+            while (enume.hasMoreElements()) {
+                tmp.add(enume.nextElement());
+            }
+            return of(tmp.toArray());
         }
 
         @SuppressWarnings("unchecked")
@@ -204,6 +228,7 @@ public class S {
         /**
          * put elements to the left.delete the null ones
          *
+         * @param arr
          * @return
          */
         public static Object[] shrink(Object[] arr) {
@@ -269,6 +294,7 @@ public class S {
     /**
      * assert
      *
+     * @param a
      * @param testee
      * @param tester
      * @param err
@@ -317,16 +343,14 @@ public class S {
 
             public static <E> HashSet<E> hashSet(E[] arr) {
                 final HashSet<E> ret = new HashSet<E>();
-                for (E t : arr) {
-                    ret.add(t);
-                }
+                ret.addAll(Arrays.asList(arr));
                 return ret;
             }
         }
 
         public static class list {
 
-            public <E> ArrayList<E> arrayList(Iterable<E> arr) {
+            public static <E> ArrayList<E> arrayList(Iterable<E> arr) {
                 final ArrayList<E> ret = new ArrayList<E>();
                 for (E t : arr) {
                     ret.add(t);
@@ -334,15 +358,18 @@ public class S {
                 return ret;
             }
 
-            public <E> ArrayList<E> arrayList(E[] arr) {
+            public static <E> ArrayList<E> arrayList(E[] arr) {
                 final ArrayList<E> ret = new ArrayList<E>();
-                for (E t : arr) {
-                    ret.add(t);
-                }
+                /*
+                 for (E t : arr) {
+                 ret.add(t);
+                 }
+                 */
+                ret.addAll(Arrays.asList(arr));
                 return ret;
             }
 
-            public <E> LinkedList<E> linkedList(Iterable<E> arr) {
+            public static <E> LinkedList<E> linkedList(Iterable<E> arr) {
                 final LinkedList<E> ret = new LinkedList<E>();
                 for (E t : arr) {
                     ret.add(t);
@@ -350,11 +377,9 @@ public class S {
                 return ret;
             }
 
-            public <E> LinkedList<E> linkedList(E[] arr) {
+            public static <E> LinkedList<E> linkedList(E[] arr) {
                 final LinkedList<E> ret = new LinkedList<E>();
-                for (E t : arr) {
-                    ret.add(t);
-                }
+                ret.addAll(Arrays.asList(arr));
                 return ret;
             }
         }
@@ -388,6 +413,10 @@ public class S {
 
     /**
      * ***************** E ********************
+     */
+    /**
+     *
+     * @param o
      */
     public static void echo(Object o) {
         logger.echo(echots(o));
@@ -425,7 +454,11 @@ public class S {
     }
 
     /**
-     * ******************* F **********************
+     * ******************* F
+     *
+     **********************
+     * @param <K>
+     * @param <V>
      */
     public final static class ForMap<K, V> {
 
@@ -438,7 +471,7 @@ public class S {
         public ForMap<K, V> grep(Function<Boolean, Entry<K, V>> grepFunc) {
             Map<K, V> newm = S.map.hashMap(null);
             for (Entry<K, V> entry : map.entrySet()) {
-                if (grepFunc.f(entry)) {
+                if (grepFunc.apply(entry)) {
                     newm.put(entry.getKey(), entry.getValue());
                 }
             }
@@ -447,39 +480,41 @@ public class S {
 
         public ForMap<K, V> grepByKey(Function<Boolean, K> grepFunc) {
             Map<K, V> newm = S.map.hashMap(null);
+
             for (Entry<K, V> entry : map.entrySet()) {
-                if (grepFunc.f(entry.getKey())) {
+                if (grepFunc.apply(entry.getKey())) {
                     newm.put(entry.getKey(), entry.getValue());
                 }
             }
+
             return new ForMap<K, V>(newm);
         }
 
         public ForMap<K, V> grepByValue(Function<Boolean, V> grepFunc) {
             Map<K, V> newm = S.map.hashMap(null);
             for (Entry<K, V> entry : map.entrySet()) {
-                if (grepFunc.f(entry.getValue())) {
+                if (grepFunc.apply(entry.getValue())) {
                     newm.put(entry.getKey(), entry.getValue());
                 }
             }
             return new ForMap<K, V>(newm);
         }
 
-        public Entry<K, V> reduce(Function2<Entry<K, V>, Entry<K, V>, Entry<K, V>> reduceLeft) {
+        public Entry<K, V> reduce(Function._2<Entry<K, V>, Entry<K, V>, Entry<K, V>> reduceLeft) {
             return list.one(map.entrySet()).reduceLeft(reduceLeft);
         }
 
         public <R> ForMap<K, R> map(Function<R, V> mapFunc) {
             Map<K, R> newm = S.map.hashMap(null);
             for (Entry<K, V> entry : map.entrySet()) {
-                newm.put(entry.getKey(), mapFunc.f(entry.getValue()));
+                newm.put(entry.getKey(), mapFunc.apply(entry.getValue()));
             }
             return new ForMap<K, R>(newm);
         }
 
         public ForMap<K, V> each(Callback<Entry<K, V>> eachFunc) {
             for (Entry<K, V> entry : map.entrySet()) {
-                eachFunc.f(entry);
+                eachFunc.apply(entry);
             }
             return this;
         }
@@ -493,11 +528,9 @@ public class S {
     public final static class ForIt<E> {
 
         final Iterable<E> iter;
-        int size = -1;
 
         public ForIt(Collection<E> e) {
             iter = e;
-            size = e.size();
         }
 
         public ForIt(Iterable<E> e) {
@@ -506,60 +539,52 @@ public class S {
 
         public ForIt(E[] e) {
             iter = list.one(e);
-            size = e.length;
         }
 
         private <R> Collection<R> _initCollection(Class<?> itClass) {
             Collection<R> re;
-            if (Collection.class.isAssignableFrom(itClass)) {
-                try {
-                    re = _one(itClass);
-                } catch (InstantiationException e) {
-                    re = list.one();
-                } catch (IllegalAccessException e) {
-                    re = list.one();
-                }
-            } else {
-                re = list.one();
-            }
+
+            //FIXME: treeMap treeSet can put non-compareable
+//            if (Collection.class.isAssignableFrom(itClass)) {
+//                try {
+//                    re = _one(itClass);
+//                } catch (InstantiationException | IllegalAccessException e) {
+            re = list.one();
+//                }
+//            } else {
+//                re = list.one();
+//            }
             return re;
         }
 
         public <R> ForIt<R> map(final Function<R, E> mapper) {
             final Class<?> itClass = iter.getClass();
             final Collection<R> result = _initCollection(itClass);
-            each(new Callback<E>() {
-                public void f(E element) {
-                    result.add(mapper.f(element));
-                }
+            each((e) -> {
+                result.add(mapper.apply(e));
             });
             return new ForIt<R>(result);
         }
 
         public ForIt<E> each(Callback<E> eachFunc) {
-            int size = 0;
             for (E e : iter) {
-                size++;
-                eachFunc.f(e);
+                eachFunc.apply(e);
             }
-            this.size = size;
             return this;
         }
 
         public ForIt<E> grep(final Function<Boolean, E> grepFunc) {
             final Class<?> itClass = iter.getClass();
             final Collection<E> c = _initCollection(itClass);
-            each(new Callback<E>() {
-                public void f(E e) {
-                    if (grepFunc.f(e)) {
-                        c.add(e);
-                    }
+            each((e) -> {
+                if (grepFunc.apply(e)) {
+                    c.add(e);
                 }
             });
             return new ForIt<E>(c);
         }
 
-        public E reduce(final Function2<E, E, E> reduceLeft) {
+        public E reduce(final Function._2<E, E, E> reduceLeft) {
             return list.one(iter).reduceLeft(reduceLeft);
         }
 
@@ -576,84 +601,7 @@ public class S {
         }
 
         public E[] join() throws RuntimeException {
-            _assert(size != -1, " size = -1");
-            Object[] arr = new Object[size];
-            int cnt = 0;
-            final Iterator<E> it = iter.iterator();
-            while (it.hasNext()) {
-                arr[cnt++] = it.next();
-            }
-            return array.<E>of(arr);
-        }
-    }
-
-    /**
-     * Functions
-     */
-    public static interface function {
-
-        public static interface Callback<T> {
-
-            void f(T t);
-        }
-
-        public static interface Callback0 {
-
-            void f();
-        }
-
-        public static interface Callback2<A, B> {
-
-            void f(A a, B b);
-        }
-
-        public static interface Callback3<A, B, C> {
-
-            void f(A a, B b);
-        }
-
-        @Deprecated
-        public static interface Callback4<A, B, C, D> {
-
-            void f(A a, B b, C c, D d);
-        }
-
-        @Deprecated
-        public static interface Callback5<A, B, C, D, E> {
-
-            void f(A a, B b, C c, D d, E e);
-        }
-
-        public static interface Function<R, A> {
-
-            R f(A a);
-        }
-
-        public static interface Function0<R> {
-
-            R f();
-        }
-
-        public static interface Function2<R, A, B> {
-
-            R f(A a, B b);
-        }
-
-        public static interface Function3<R, A, B, C> {
-
-            R f(A a, B b, C c);
-        }
-
-        @Deprecated
-        public static interface Function4<R, A, B, C, D> {
-
-            R f(A a, B b, C c, D d);
-        }
-
-        @Deprecated
-        public static interface Function5<R, A, B, C, D, E> {
-
-            R f(A a, B b, C c, D d, E e);
+            return S.array.<E>of(iter);
         }
     }
 
@@ -745,9 +693,7 @@ public class S {
 
             protected FList(T[] a) {
                 super();
-                for (T t : a) {
-                    this.add(t);
-                }
+                this.addAll(Arrays.asList(a));
             }
 
             protected FList(List<T> a) {
@@ -782,7 +728,7 @@ public class S {
                 return ret;
             }
 
-            public T reduceLeft(Function2<T, T, T> reduceFunc) {
+            public T reduceLeft(Function._2<T, T, T> reduceFunc) {
                 if (this.size() == 1) {
                     return this.get(0);
                 }
@@ -791,13 +737,13 @@ public class S {
                 for (int i = 0; i < this.size() - 1; i++) {
                     result = this.get(i);
                     next = this.get(i + 1);
-                    result = reduceFunc.f(result, next);
+                    result = reduceFunc.apply(result, next);
                 }
                 return result;
             }
 
             @SuppressWarnings({"rawtypes", "unchecked"})
-            public Object reduceRight(Function2 reduceFunc) {
+            public Object reduceRight(Function._2 reduceFunc) {
                 if (this.size() == 1) {
                     return this.get(0);
                 }
@@ -806,7 +752,7 @@ public class S {
                 for (int i = this.size() - 1; i >= 1; i--) {
                     result = this.get(i);
                     next = this.get(i - 1);
-                    result = reduceFunc.f(result, next);
+                    result = reduceFunc.apply(result, next);
                 }
                 return result;
             }
@@ -893,8 +839,7 @@ public class S {
         public static Matrix addHorizontal(Matrix... some) {
             int height = 0;
             int width = 0;
-            for (int i = 0; i < some.length; i++) {
-                Matrix x = some[i];
+            for (Matrix x : some) {
                 height = S.math.max(height, x.rows());
                 width += x.cols();
             }
@@ -907,12 +852,11 @@ public class S {
             }
 
             int colfix = 0;
-            for (int i = 0; i < some.length; i++) {
-                Matrix x = some[i];
+            for (Matrix x : some) {
                 for (int h = 0; h < x.rows(); h++) {
                     int[] row = x.row(h);
-                    for (int _ = 0; _ < row.length; _++) {
-                        out[h][colfix + _] = (char) row[_];
+                    for (int _i = 0; _i < row.length; _i++) {
+                        out[h][colfix + _i] = (char) row[_i];
                     }
                 }
                 colfix += x.cols();
@@ -923,16 +867,12 @@ public class S {
         public static Matrix fromString(String... s) {
             S.echo(s);
             final int maxLen = ((String) list.one(S.array.<String>of(S.array.shrink(s))).reduceLeft(
-                    new Function2<String, String, String>() {
-
-                        public String f(String a, String b) {
-                            if (a == null || b == null) {
-                                return "";
-                            }
-                            return a.length() > b.length() ? a : b;
-                        }
-
-                    })).length();
+                (String a, String b) -> {
+                    if (a == null || b == null) {
+                        return "";
+                    }
+                    return a.length() > b.length() ? a : b;
+                })).length();
 
             int[][] ret = new int[s.length][maxLen];
             for (int i = 0; i < s.length; i++) {
@@ -949,7 +889,7 @@ public class S {
      */
     final public static class nothing {
 
-        public final static Boolean _boolean = new Boolean(false);
+        public final static Boolean _boolean = Boolean.FALSE;
         public final static Character _char = new Character((char) '\0');
         public final static Byte _byte = new Byte((byte) 0);
         public final static Integer _int = new Integer(0);
@@ -959,29 +899,18 @@ public class S {
         public final static Double _double = new Double(0);
 
         final static Cache<Class<?>, Object> _nothingValues = Cache.<Class<?>, Object>defaultCache().onNotFound(
-                new Function<Object, Class<?>>() {
+            new Function<Object, Class<?>>() {
 
-                    @Override
-                    public Object f(Class<?> a) {
-                        return Enhancer.create(_notNull(a), new MethodInterceptor() {
-
-                            @Override
-                            public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy)
-                            throws Throwable {
-								// nothing value must do
-                                // nothing;
-                                return null;
-                            }
-
-                        });
-                    }
-                });
+                @Override
+                public Object apply(Class<?> a) {
+                    return Enhancer.create(_notNull(a), (MethodInterceptor) (Object obj, Method method, Object[] args, MethodProxy proxy) -> null);
+                }
+            });
 
         static {
-
-            _nothingValues.put(String.class, new String("")).put(Boolean.class, _boolean).put(Integer.class, _int)
-                    .put(Byte.class, _byte).put(Character.class, _char).put(Short.class, _short).put(Long.class, _long)
-                    .put(Float.class, _float).put(Double.class, _double).put(Object.class, new Object());
+            _nothingValues.put(String.class, "").put(Boolean.class, _boolean).put(Integer.class, _int)
+                .put(Byte.class, _byte).put(Character.class, _char).put(Short.class, _short).put(Long.class, _long)
+                .put(Float.class, _float).put(Double.class, _double).put(Object.class, new Object());
         }
         final private Class<?> proxyClass;
 
@@ -1005,6 +934,10 @@ public class S {
      */
     /**
      * ******************* P **********************
+     */
+    /**
+     *
+     * @param <T>
      */
     @SuppressWarnings("unchecked")
     final public static class proxy<T> {
@@ -1040,14 +973,15 @@ public class S {
         }
 
         public T create() {
-            return (T) Enhancer.create(_clazz, new MethodInterceptor() {
+            return (T) Enhancer.create(_clazz,
+                                       new MethodInterceptor() {
 
-                @Override
-                public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-                    return _avoidNull(_mm.get(method.getName()), Function.class).f(args);
-                }
+                                           @Override
+                                           public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+                                               return _avoidNull(_mm.get(method.getName()), Function.class).apply(args);
+                                           }
 
-            });
+                                       });
 
         }
     }
@@ -1079,7 +1013,7 @@ public class S {
             try {
                 String path = S.class.getClassLoader().getResource("").toURI().getPath();
                 return new File(path).getAbsolutePath();
-            } catch (Exception e) {
+            } catch (URISyntaxException e) {
                 String path = S.class.getClassLoader().getResource("").getPath();
                 return new File(path).getAbsolutePath();
             }
@@ -1112,7 +1046,7 @@ public class S {
             try {
                 String path = S.class.getResource("/").toURI().getPath();
                 return new File(path).getParentFile().getParentFile().getCanonicalPath();
-            } catch (Exception e) {
+            } catch (URISyntaxException | IOException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -1202,11 +1136,11 @@ public class S {
         }
 
         public static boolean isBlank(String str) {
-            return str == null || "".equals(str.trim()) ? true : false;
+            return str == null || "".equals(str.trim());
         }
 
         public static boolean notBlank(String str) {
-            return str == null || "".equals(str.trim()) ? false : true;
+            return str != null && !"".equals(str.trim());
         }
 
         public static boolean notBlank(String... strings) {
@@ -1235,7 +1169,8 @@ public class S {
 
         /**
          *
-         * @param str
+         * @param ori
+         * @param ch
          * @param idx
          * @return
          */
@@ -1258,45 +1193,10 @@ public class S {
     /**
      * ******************* T **********************
      */
-    final public static class Tuple<A, B> {
-
-        public A a;
-        public B b;
-
-        public Tuple(A a, B b) {
-            this.a = a;
-            this.b = b;
-        }
-    }
-
-    final public static class Tuple3<A, B, C> {
-
-        public A a;
-        public B b;
-        public C c;
-
-        public Tuple3(A a, B b, C c) {
-            this.a = a;
-            this.b = b;
-            this.c = c;
-        }
-    }
-
-    final public static class Tuple4<A, B, C, D> {
-
-        public A a;
-        public B b;
-        public C c;
-        public D d;
-
-        public Tuple4(A a, B b, C c, D d) {
-            this.a = a;
-            this.b = b;
-            this.c = c;
-            this.d = d;
-        }
-    }
-
+    /**
+     *
+     * @return
+     */
     public static long time() {
         return System.currentTimeMillis();
     }

@@ -5,7 +5,7 @@ public class Tuple<A, B> {
 	public final A _a;
 	public final B _b;
 
-	public static <A, B> Tuple<A, B> _(A a, B b) {
+	public static <A, B> Tuple<A, B> _2(A a, B b) {
 		return new Tuple<A, B>(a, b);
 	}
 

@@ -31,12 +31,14 @@ public abstract class Out implements Namable<Out>
 		return level;
 	}
 
+	@Override
 	public String name()
 	{
 		return name;
 		
 	}
 
+	@Override
 	public Out name(String name)
 	{
 		this.name = name;
