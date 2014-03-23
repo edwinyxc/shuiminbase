@@ -150,7 +150,8 @@ public class S {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T _one(Class<?> clazz) throws InstantiationException, IllegalAccessException {
+    public static <T> T _one(Class<?> clazz) throws InstantiationException,
+        IllegalAccessException {
         return (T) clazz.newInstance();
     }
 
@@ -274,7 +275,8 @@ public class S {
          * @return
          */
         public static Object fromList(Class<?> clazz, List<?> list) {
-            Object array = java.lang.reflect.Array.newInstance(clazz, list.size());
+            Object array = java.lang.reflect.Array.
+                newInstance(clazz, list.size());
             for (int i = 0; i < list.size(); i++) {
                 java.lang.reflect.Array.set(array, i, list.get(i));
             }
@@ -282,7 +284,8 @@ public class S {
         }
 
         public static Object convertType(Class<?> clazz, Object[] arr) {
-            Object array = java.lang.reflect.Array.newInstance(clazz, arr.length);
+            Object array = java.lang.reflect.Array.
+                newInstance(clazz, arr.length);
             for (int i = 0; i < arr.length; i++) {
                 java.lang.reflect.Array.set(array, i, arr[i]);
             }
@@ -419,38 +422,30 @@ public class S {
      * @param o
      */
     public static void echo(Object o) {
-        logger.echo(echots(o));
+        logger.echo(dump(o));
     }
 
-    public static String echots(Object o) {
-        StringBuilder ret = new StringBuilder();
-        if (o.getClass().isPrimitive()) {
-            ret.append(o);
-        }
-        if (o instanceof String) {
-            ret.append((String) o);
-        } else if (o instanceof List) {
-            ret.append("[");
-            for (int i = 0; i < ((List<?>) o).size(); i++) {
-                ret.append(String.valueOf(((List<?>) o).get(i)));
-                if (i != ((List<?>) o).size() - 1) {
-                    ret.append(',');
-                }
-            }
-            ret.append("]");
-        } else if (o.getClass().isArray()) {
-            ret.append("[");
-            for (int i = 0; i < java.lang.reflect.Array.getLength(o); i++) {
-                ret.append(String.valueOf(java.lang.reflect.Array.get(o, i)));
-                if (i != java.lang.reflect.Array.getLength(o) - 1) {
-                    ret.append(',');
-                }
-            }
-            ret.append("]");
+    public static String dump(Object o) {
+        Class clazz = o.getClass();
+        if (clazz.isPrimitive()) {
+            return String.valueOf(o);
+        } else if (o instanceof String) {
+            return (String) o;
+        } else if (o instanceof Iterable) {
+            return "["
+                + String.join(",", _for((Iterable) o).
+                    <String>map((i) -> (dump(i))).val())
+                + "]";
+        } else if (clazz.isArray()) {
+            return "["
+                + String.join(",", _for((Object[]) o).
+                    <String>map((i) -> (dump(i))).val())
+                + "]";
+        } else if (o instanceof Map) {
+            return _for((Map) o).<String>map((i) -> (dump(i))).val().toString();
         } else {
-            ret.append(o.toString());
+            return o.toString();
         }
-        return ret.toString();
     }
 
     /**
