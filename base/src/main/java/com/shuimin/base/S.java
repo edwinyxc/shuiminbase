@@ -164,6 +164,14 @@ public class S {
             return list.one(arr);
         }
 
+        public static <T> T last(T[] array) {
+            return array[array.length - 1];
+        }
+
+        public static <T> T first(T[] array) {
+            return array[0];
+        }
+
         public static <T> T[] of(Iterable<T> iterable) {
             List<T> tmp = new LinkedList<T>();
             for (T e : iterable) {
@@ -232,7 +240,7 @@ public class S {
          * @param arr
          * @return
          */
-        public static Object[] shrink(Object[] arr) {
+        public static Object[] compact(Object[] arr) {
             int cur = 0;
             int next_val = 0;
             while (next_val < arr.length) {
@@ -587,6 +595,10 @@ public class S {
             return iter;
         }
 
+        public ForIt<E> compact() {
+            return grep((e) -> (e != null));
+        }
+
         public E first() {
             Iterator<E> it = iter.iterator();
             if (it.hasNext()) {
@@ -861,7 +873,7 @@ public class S {
 
         public static Matrix fromString(String... s) {
             S.echo(s);
-            final int maxLen = ((String) list.one(S.array.<String>of(S.array.shrink(s))).reduceLeft(
+            final int maxLen = ((String) list.one(S.array.<String>of(S.array.compact(s))).reduceLeft(
                 (String a, String b) -> {
                     if (a == null || b == null) {
                         return "";
