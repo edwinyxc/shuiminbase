@@ -151,7 +151,7 @@ public class S {
 
     @SuppressWarnings("unchecked")
     public static <T> T _one(Class<?> clazz) throws InstantiationException,
-        IllegalAccessException {
+            IllegalAccessException {
         return (T) clazz.newInstance();
     }
 
@@ -284,7 +284,7 @@ public class S {
          */
         public static Object fromList(Class<?> clazz, List<?> list) {
             Object array = java.lang.reflect.Array.
-                newInstance(clazz, list.size());
+                    newInstance(clazz, list.size());
             for (int i = 0; i < list.size(); i++) {
                 java.lang.reflect.Array.set(array, i, list.get(i));
             }
@@ -293,7 +293,7 @@ public class S {
 
         public static Object convertType(Class<?> clazz, Object[] arr) {
             Object array = java.lang.reflect.Array.
-                newInstance(clazz, arr.length);
+                    newInstance(clazz, arr.length);
             for (int i = 0; i < arr.length; i++) {
                 java.lang.reflect.Array.set(array, i, arr[i]);
             }
@@ -441,14 +441,14 @@ public class S {
             return (String) o;
         } else if (o instanceof Iterable) {
             return "["
-                + String.join(",", _for((Iterable) o).
-                    <String>map((i) -> (dump(i))).val())
-                + "]";
+                    + String.join(",", _for((Iterable) o).
+                            <String>map((i) -> (dump(i))).val())
+                    + "]";
         } else if (clazz.isArray()) {
             return "["
-                + String.join(",", _for((Object[]) o).
-                    <String>map((i) -> (dump(i))).val())
-                + "]";
+                    + String.join(",", _for((Object[]) o).
+                            <String>map((i) -> (dump(i))).val())
+                    + "]";
         } else if (o instanceof Map) {
             return _for((Map) o).<String>map((i) -> (dump(i))).val().toString();
         } else {
@@ -874,12 +874,12 @@ public class S {
         public static Matrix fromString(String... s) {
             S.echo(s);
             final int maxLen = ((String) list.one(S.array.<String>of(S.array.compact(s))).reduceLeft(
-                (String a, String b) -> {
-                    if (a == null || b == null) {
-                        return "";
-                    }
-                    return a.length() > b.length() ? a : b;
-                })).length();
+                    (String a, String b) -> {
+                        if (a == null || b == null) {
+                            return "";
+                        }
+                        return a.length() > b.length() ? a : b;
+                    })).length();
 
             int[][] ret = new int[s.length][maxLen];
             for (int i = 0; i < s.length; i++) {
@@ -906,18 +906,18 @@ public class S {
         public final static Double _double = new Double(0);
 
         final static Cache<Class<?>, Object> _nothingValues = Cache.<Class<?>, Object>defaultCache().onNotFound(
-            new Function<Object, Class<?>>() {
+                new Function<Object, Class<?>>() {
 
-                @Override
-                public Object apply(Class<?> a) {
-                    return Enhancer.create(_notNull(a), (MethodInterceptor) (Object obj, Method method, Object[] args, MethodProxy proxy) -> null);
-                }
-            });
+                    @Override
+                    public Object apply(Class<?> a) {
+                        return Enhancer.create(_notNull(a), (MethodInterceptor) (Object obj, Method method, Object[] args, MethodProxy proxy) -> null);
+                    }
+                });
 
         static {
             _nothingValues.put(String.class, "").put(Boolean.class, _boolean).put(Integer.class, _int)
-                .put(Byte.class, _byte).put(Character.class, _char).put(Short.class, _short).put(Long.class, _long)
-                .put(Float.class, _float).put(Double.class, _double).put(Object.class, new Object());
+                    .put(Byte.class, _byte).put(Character.class, _char).put(Short.class, _short).put(Long.class, _long)
+                    .put(Float.class, _float).put(Double.class, _double).put(Object.class, new Object());
         }
         final private Class<?> proxyClass;
 
@@ -981,14 +981,14 @@ public class S {
 
         public T create() {
             return (T) Enhancer.create(_clazz,
-                                       new MethodInterceptor() {
+                    new MethodInterceptor() {
 
-                                           @Override
-                                           public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-                                               return _avoidNull(_mm.get(method.getName()), Function.class).apply(args);
-                                           }
+                        @Override
+                        public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+                            return _avoidNull(_mm.get(method.getName()), Function.class).apply(args);
+                        }
 
-                                       });
+                    });
 
         }
     }
