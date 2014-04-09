@@ -1,11 +1,9 @@
 package com.shuimin.base.s;
 
 import com.shuimin.base.S;
+
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -68,8 +66,9 @@ public class STest {
 //        List<Integer> list = Arrays.asList(new Integer[]{1, 2, 3, 4});
 //
 //        S.echo(map.get("one"));
-//		test_lazyThrow();
-        
+//		w
+
+
         test_array_join();
     }
 }

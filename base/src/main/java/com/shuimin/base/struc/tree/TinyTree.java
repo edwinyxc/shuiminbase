@@ -1,26 +1,18 @@
 package com.shuimin.base.struc.tree;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Stack;
-import java.util.TreeMap;
-
 import com.shuimin.base.S;
 import com.shuimin.base.f.Function;
 import com.shuimin.base.struc.Matrix;
 import com.shuimin.base.util.cui.Rect;
 import com.shuimin.base.util.cui.RichLayout;
 
+import java.util.*;
+
 public class TinyTree<E> implements Tree<E> {
 
     private class BFS implements Iterator<Tree<E>> {
 
-        private final Queue<Iterator<Tree<E>>> queue = new LinkedList<Iterator<Tree<E>>>();
+        private final Queue<Iterator<Tree<E>>> queue = new LinkedList<>();
 
         public BFS(Tree<E> node) {
             queue.offer(node.children().iterator());
@@ -62,7 +54,7 @@ public class TinyTree<E> implements Tree<E> {
 
     private class DFS implements Iterator<Tree<E>> {
 
-        final private Stack<Iterator<Tree<E>>> stack = new Stack<Iterator<Tree<E>>>();
+        final private Stack<Iterator<Tree<E>>> stack = new Stack<>();
 
         public DFS(Tree<E> node) {
             S._assert(node, "node null");
@@ -102,32 +94,28 @@ public class TinyTree<E> implements Tree<E> {
         }
     }
 
-    private final Map<String, Object> attrs = new TreeMap<String, Object>();
+    private final Map<String, Object> attrs = new TreeMap<>();
 
     private int idxInParent = -1;
 
     private E elem;
 
-    private List<Tree<E>> children = new LinkedList<Tree<E>>();
+    private List<Tree<E>> children = new LinkedList<>();
 
     private Tree<E> parent;
 
     private Tree<E> root = this;
 
-    protected Selector<Tree<E>> selector = new Selector<Tree<E>>() {
-        @Override
-        public Tree<E> select(String name) {
-            for (Tree<E> node : TinyTree.this.children) {
-                if (node == null) {
-                    continue;
-                }
-                if (S.str.notBlank(node.name()) && node.name().equals(name)) {
-                    return node;
-                }
+    protected Selector<Tree<E>> selector = name -> {
+        for (Tree<E> node : TinyTree.this.children) {
+            if (node == null) {
+                continue;
             }
-            return null;
+            if (S.str.notBlank(node.name()) && node.name().equals(name)) {
+                return node;
+            }
         }
-
+        return null;
     };
 
     protected TinyTree() {
@@ -168,7 +156,7 @@ public class TinyTree<E> implements Tree<E> {
 
     @Override
     public Tree<E> asNew() {
-        return new TinyTree<E>(this);
+        return new TinyTree<>(this);
     }
 
     @Override
@@ -321,7 +309,7 @@ public class TinyTree<E> implements Tree<E> {
 
     @Override
     public List<Tree<E>> nextAll() {
-        return S.list.<Tree<E>>one(parent.children()).slice(idxInParent + 1,
+        return S.list.one((Iterable<Tree<E>>) parent.children()).slice(idxInParent + 1,
                 parent.children().size());
     }
 
@@ -332,7 +320,7 @@ public class TinyTree<E> implements Tree<E> {
 
     @Override
     public List<Tree<E>> parents() {
-        final List<Tree<E>> ret = new ArrayList<Tree<E>>();
+        final List<Tree<E>> ret = new ArrayList<>();
         Tree<E> node = this;
         while (node != null) {
             ret.add(node);
@@ -353,7 +341,7 @@ public class TinyTree<E> implements Tree<E> {
 
     @Override
     public List<Tree<E>> prevAll() {
-        return S.list.<Tree<E>>one(parent.children()).slice(0, idxInParent);
+        return S.list.one((Iterable<Tree<E>>) parent.children()).slice(0, idxInParent);
     }
 
     @Override

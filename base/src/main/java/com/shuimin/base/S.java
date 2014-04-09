@@ -15,11 +15,13 @@ import com.shuimin.base.util.logger.Logger;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
+import sun.misc.Unsafe;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.text.ParseException;
@@ -33,6 +35,19 @@ public class S {
      * ***************** logger *****************
      */
     private final static Logger logger = Logger.getDefault();
+
+    private final static Unsafe unsafe  = ((Function._0<Unsafe>) () -> {
+        try {
+            Field uf = Unsafe.class.getDeclaredField("theUnsafe");
+            uf.setAccessible(true);
+            return (Unsafe) uf.get(null);
+        }catch(IllegalAccessException a){
+            a.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }).apply();
 
     public static final Logger logger() {
         return logger;
@@ -85,6 +100,9 @@ public class S {
         throw new RuntimeException(a);
     }
 
+    public static void _throw(Throwable a) {
+        unsafe.throwException(a);
+    }
     // public static <T> _ord(,T t){}
     public static <T> T _fail() {
         throw new RuntimeException("BUG OCCUR, CONTACT ME:" + author());
@@ -117,19 +135,19 @@ public class S {
     }
 
     public final static <E> ForIt<E> _for(Iterable<E> c) {
-        return new ForIt<E>(c);
+        return new ForIt(c);
     }
 
     public final static <E> ForIt<E> _for(E[] c) {
-        return new ForIt<E>(c);
+        return new ForIt(c);
     }
 
-    public final static <E> ForIt<E> _for(Enumeration<E> emun) {
-        return new ForIt<E>(new IterableEnumeration<E>(emun));
+    public final static <E> ForIt<E> _for(Enumeration<E> enumeration) {
+        return new ForIt(new IterableEnumeration(enumeration));
     }
 
     public final static <K, V> ForMap<K, V> _for(Map<K, V> c) {
-        return new ForMap<K, V>(c);
+        return new ForMap(c);
     }
 
     @SuppressWarnings("unchecked")
@@ -155,19 +173,19 @@ public class S {
             return array[0];
         }
 
-        public static <T> T[] of(Iterable<T> iterable) {
-            List<T> tmp = new LinkedList<T>();
-            for (T e : iterable) {
+        public static <T> T[] of(Iterable<T> iter) {
+            List<T> tmp = new LinkedList<>();
+            for (T e : iter) {
                 tmp.add(e);
             }
             return of(tmp.toArray());
 //            return S.array.of(tmp.toArray());
         }
 
-        public static <T> T[] of(Enumeration<T> enume) {
-            List<T> tmp = new LinkedList<T>();
-            while (enume.hasMoreElements()) {
-                tmp.add(enume.nextElement());
+        public static <T> T[] of(Enumeration<T> enumeration) {
+            List<T> tmp = new LinkedList<>();
+            while (enumeration.hasMoreElements()) {
+                tmp.add(enumeration.nextElement());
             }
             return of(tmp.toArray());
         }
@@ -300,7 +318,6 @@ public class S {
     /**
      * assert
      *
-     * @param testee
      * @param tester
      * @param err
      */
@@ -320,21 +337,20 @@ public class S {
     /**
      * ***************** C ********************
      */
-    // @SuppressWarnings({ "rawtypes", "unchecked" })
     public static class collection {
 
         public static class set {
 
             public static <E> HashSet<E> hashSet(Iterable<E> arr) {
-                final HashSet<E> ret = new HashSet<E>();
-                for (E t : arr) {
-                    ret.add(t);
+                HashSet<E> ret = new HashSet<>();
+                for(E e : arr){
+                   ret.add(e);
                 }
                 return ret;
             }
 
             public static <E> HashSet<E> hashSet(E[] arr) {
-                final HashSet<E> ret = new HashSet<E>();
+                final HashSet<E> ret = new HashSet<>();
                 ret.addAll(Arrays.asList(arr));
                 return ret;
             }
@@ -343,7 +359,7 @@ public class S {
         public static class list {
 
             public static <E> ArrayList<E> arrayList(Iterable<E> arr) {
-                final ArrayList<E> ret = new ArrayList<E>();
+                final ArrayList<E> ret = new ArrayList<>();
                 for (E t : arr) {
                     ret.add(t);
                 }
@@ -351,7 +367,7 @@ public class S {
             }
 
             public static <E> ArrayList<E> arrayList(E[] arr) {
-                final ArrayList<E> ret = new ArrayList<E>();
+                final ArrayList<E> ret = new ArrayList<>();
                 /*
                  for (E t : arr) {
                  ret.add(t);
@@ -362,7 +378,7 @@ public class S {
             }
 
             public static <E> LinkedList<E> linkedList(Iterable<E> arr) {
-                final LinkedList<E> ret = new LinkedList<E>();
+                final LinkedList<E> ret = new LinkedList<>();
                 for (E t : arr) {
                     ret.add(t);
                 }
@@ -370,7 +386,7 @@ public class S {
             }
 
             public static <E> LinkedList<E> linkedList(E[] arr) {
-                final LinkedList<E> ret = new LinkedList<E>();
+                final LinkedList<E> ret = new LinkedList<>();
                 ret.addAll(Arrays.asList(arr));
                 return ret;
             }
@@ -528,7 +544,7 @@ public class S {
         private <R> Collection<R> _initCollection(Class<?> itClass) {
             Collection<R> re;
 
-            //FIXME: treeMap treeSet can put non-compareable
+            //TODO: treeMap treeSet can put non-compareable
 //            if (Collection.class.isAssignableFrom(itClass)) {
 //                try {
 //                    re = _one(itClass);
@@ -586,9 +602,10 @@ public class S {
             return null;
         }
 
-        public E[] join() throws RuntimeException {
+        public E[] join() {
             return S.array.<E>of(iter);
         }
+
     }
 
     public static class file {
