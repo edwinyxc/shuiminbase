@@ -1,38 +1,29 @@
 package com.shuimin.base.struc.cache;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import com.shuimin.base.S;
 import com.shuimin.base.f.Callback;
 import com.shuimin.base.f.Function;
 import com.shuimin.base.struc.Cache;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public abstract class AbstractCache<K, V> extends Cache<K, V> {
 
     @SuppressWarnings("rawtypes")
     protected final Map cache;
 
-    protected Function<V, K> onNothingFound = new Function<V, K>() {
-        @Override
-        public V apply(K a) {
-            return null;
-        }
-
-    };
+    protected Function<V, K> onNothingFound = a -> null;
 
     @Override
-    public Cache<K, V> onNotFound(Function<V, K> nothingFoundLisener) {
-        onNothingFound = S._notNull(nothingFoundLisener);
+    public Cache<K, V> onNotFound(Function<V, K> nothingFoundListener) {
+        onNothingFound = S._notNull(nothingFoundListener);
         return this;
     }
 
-    protected Callback._2<K, V> onRemove = new Callback._2<K, V>() {
-        @Override
-        public void apply(K k, V v) {
-            // do nothing
-        }
+    protected Callback._2<K, V> onRemove = (k, v) -> {
+        // do nothing
     };
 
     @Override

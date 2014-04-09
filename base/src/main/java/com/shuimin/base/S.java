@@ -36,35 +36,30 @@ public class S {
      */
     private final static Logger logger = Logger.getDefault();
 
-    private final static Unsafe unsafe  = ((Function._0<Unsafe>) () -> {
+    private final static Unsafe unsafe = ((Function._0<Unsafe>) () -> {
         try {
             Field uf = Unsafe.class.getDeclaredField("theUnsafe");
             uf.setAccessible(true);
             return (Unsafe) uf.get(null);
-        }catch(IllegalAccessException a){
+        } catch (IllegalAccessException | NoSuchFieldException a) {
             a.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
         }
         return null;
     }).apply();
 
-    public static final Logger logger() {
+    public static Logger logger() {
         return logger;
     }
 
     /**
      * ***************** meta *****************
      */
-    /**
-     *
-     * @return
-     */
-    public static final String author() {
+
+    public static String author() {
         return " edwinyxc@gmail.com ";
     }
 
-    public static final String version() {
+    public static String version() {
         return "v0.0.1 2014";
     }
 
@@ -72,21 +67,19 @@ public class S {
      * ***************** _ *****************
      */
     /**
-     *
-     * @param <T>
-     * @param t
-     * @return
+     * @param <T> Type t
+     * @param t   value of type T
      */
     public static <T> Some<T> _some(T t) {
         return Option.some(t);
     }
 
     public static <T> None<T> _none() {
-        return Option.<T>none();
+        return Option.none();
     }
 
     public static void _assert(boolean b) {
-        _assert(b, "assert failure,somthing wrong");
+        _assert(b, "assert failure, something`s wrong");
     }
 
     public static void _assert(boolean a, String err) {
@@ -100,10 +93,10 @@ public class S {
         throw new RuntimeException(a);
     }
 
-    public static void _throw(Throwable a) {
-        unsafe.throwException(a);
+    public static void _throw(Throwable th) {
+        unsafe.throwException(th);
     }
-    // public static <T> _ord(,T t){}
+
     public static <T> T _fail() {
         throw new RuntimeException("BUG OCCUR, CONTACT ME:" + author());
     }
@@ -113,10 +106,7 @@ public class S {
     }
 
     public static <T> T _avoidNull(T t, Class<T> clazz) {
-        if (t == null) {
-            return (T) nothing.of(clazz);// TODO possible to remove the second
-            // argument
-        }
+        if (t == null) return nothing.of(clazz);// TODO possible to remove the second
         return t;
     }
 
@@ -130,29 +120,29 @@ public class S {
         return t;
     }
 
-    public final static <T> T _notNullElse(T _check, T _else) {
+    public static <T> T _notNullElse(T _check, T _else) {
         return _check != null ? _check : _else;
     }
 
-    public final static <E> ForIt<E> _for(Iterable<E> c) {
-        return new ForIt(c);
+    public static <E> ForIt<E> _for(Iterable<E> c) {
+        return new ForIt<>(c);
     }
 
-    public final static <E> ForIt<E> _for(E[] c) {
-        return new ForIt(c);
+    public static <E> ForIt<E> _for(E[] c) {
+        return new ForIt<>(c);
     }
 
-    public final static <E> ForIt<E> _for(Enumeration<E> enumeration) {
-        return new ForIt(new IterableEnumeration(enumeration));
+    public static <E> ForIt<E> _for(Enumeration<E> enumeration) {
+        return new ForIt<>(new IterableEnumeration<>(enumeration));
     }
 
-    public final static <K, V> ForMap<K, V> _for(Map<K, V> c) {
-        return new ForMap(c);
+    public static <K, V> ForMap<K, V> _for(Map<K, V> c) {
+        return new ForMap<>(c);
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T _one(Class<?> clazz) throws InstantiationException,
-            IllegalAccessException {
+        IllegalAccessException {
         return (T) clazz.newInstance();
     }
 
@@ -179,7 +169,6 @@ public class S {
                 tmp.add(e);
             }
             return of(tmp.toArray());
-//            return S.array.of(tmp.toArray());
         }
 
         public static <T> T[] of(Enumeration<T> enumeration) {
@@ -207,7 +196,7 @@ public class S {
          * check if an array contains something
          *
          * @param arr array
-         * @param o the thing ...
+         * @param o   the thing ...
          * @return -1 if not found or the first index of the object
          */
         public static int contains(Object[] arr, Object o) {
@@ -223,7 +212,7 @@ public class S {
          * check if an array contains something
          *
          * @param arr array
-         * @param o the thing ...
+         * @param o   the thing ...
          * @return -1 if not found or the first index of the object
          */
         public static int contains(int[] arr, int o) {
@@ -238,15 +227,15 @@ public class S {
         /**
          * put elements to the left.delete the null ones
          *
-         * @param arr
-         * @return
+         * @param arr input Object array
+         * @return compacted array
          */
         public static Object[] compact(Object[] arr) {
             int cur = 0;
             int next_val = 0;
             while (next_val < arr.length) {
                 if (arr[cur] == null) {
-                    /* find_next_avaliable */
+                    /* find next available */
                     for (; next_val < arr.length; next_val++) {
                         if (arr[next_val] != null) {
                             break;// get the value
@@ -277,24 +266,31 @@ public class S {
         }
 
         /**
-         * convert a list to array
+         * Convert a list to an array.
          *
-         * @param clazz
-         * @param list
-         * @return
+         * @param clazz Class of input list
+         * @param list  input list
+         * @return array
          */
         public static Object fromList(Class<?> clazz, List<?> list) {
             Object array = java.lang.reflect.Array.
-                    newInstance(clazz, list.size());
+                newInstance(clazz, list.size());
             for (int i = 0; i < list.size(); i++) {
                 java.lang.reflect.Array.set(array, i, list.get(i));
             }
             return array;
         }
 
+        /**
+         * Convert an array to a new one in which every element has type converted.
+         *
+         * @param clazz Class to convert to
+         * @param arr   input array
+         * @return converted array
+         */
         public static Object convertType(Class<?> clazz, Object[] arr) {
             Object array = java.lang.reflect.Array.
-                    newInstance(clazz, arr.length);
+                newInstance(clazz, arr.length);
             for (int i = 0; i < arr.length; i++) {
                 java.lang.reflect.Array.set(array, i, arr[i]);
             }
@@ -304,29 +300,25 @@ public class S {
     }
 
     /**
-     * assert
+     * Assert an Object is NonNull, if not throw an RuntimeException.
      *
-     * @param a
-     * @param err
+     * @param a potential null value
      */
-    public static void _assert(Object a, String err) {
+    public static void _assert(Object a) {
         if (a == null) {
-            throw new RuntimeException(err);
+            throw new RuntimeException(new NullPointerException());
         }
     }
 
     /**
-     * assert
+     * Assert an object is non-null, if not throw an RuntimeException
+     * with input err string.
      *
-     * @param tester
-     * @param err
+     * @param a   potential null value
+     * @param err err value
      */
-    public static void _assert(Object testee, Object tester, String err) {
-        if (tester == null) {
-            throw new RuntimeException("empty tester!!! YOU`VE MADE A MISTAKE");
-        }
-
-        if (testee == null || tester.equals(testee)) {
+    public static void _assert(Object a, String err) {
+        if (a == null) {
             throw new RuntimeException(err);
         }
     }
@@ -343,8 +335,8 @@ public class S {
 
             public static <E> HashSet<E> hashSet(Iterable<E> arr) {
                 HashSet<E> ret = new HashSet<>();
-                for(E e : arr){
-                   ret.add(e);
+                for (E e : arr) {
+                    ret.add(e);
                 }
                 return ret;
             }
@@ -379,9 +371,7 @@ public class S {
 
             public static <E> LinkedList<E> linkedList(Iterable<E> arr) {
                 final LinkedList<E> ret = new LinkedList<>();
-                for (E t : arr) {
-                    ret.add(t);
-                }
+                for (E t : arr) ret.add(t);
                 return ret;
             }
 
@@ -423,13 +413,15 @@ public class S {
      * ***************** E ********************
      */
     /**
+     * <p>Print somethings to the default logger</p>
      *
-     * @param o
+     * @param o object(s) to print
      */
     public static void echo(Object o) {
         logger.echo(dump(o));
     }
 
+    @SuppressWarnings("unchecked")
     public static String dump(Object o) {
         Class clazz = o.getClass();
         if (clazz.isPrimitive()) {
@@ -438,14 +430,14 @@ public class S {
             return (String) o;
         } else if (o instanceof Iterable) {
             return "["
-                    + String.join(",", _for((Iterable) o).
-                            map((i) -> (dump(i))).val())
-                    + "]";
+                + String.join(",", _for((Iterable) o).
+                map((i) -> (dump(i))).val())
+                + "]";
         } else if (clazz.isArray()) {
             return "["
-                    + String.join(",", _for((Object[]) o).
-                            <String>map((i) -> (dump(i))).val())
-                    + "]";
+                + String.join(",", _for((Object[]) o).
+                <String>map((i) -> (dump(i))).val())
+                + "]";
         } else if (o instanceof Map) {
             return _for((Map) o).map((i) -> (dump(i))).val().toString();
         } else {
@@ -455,8 +447,9 @@ public class S {
 
     /**
      * ******************* F
+     * <p/>
+     * *********************
      *
-     **********************
      * @param <K>
      * @param <V>
      */
@@ -469,35 +462,35 @@ public class S {
         }
 
         public ForMap<K, V> grep(Function<Boolean, Entry<K, V>> grepFunc) {
-            Map<K, V> newm = S.map.hashMap(null);
+            Map<K, V> newMap = S.map.hashMap(null);
             for (Entry<K, V> entry : map.entrySet()) {
                 if (grepFunc.apply(entry)) {
-                    newm.put(entry.getKey(), entry.getValue());
+                    newMap.put(entry.getKey(), entry.getValue());
                 }
             }
-            return new ForMap<K, V>(newm);
+            return new ForMap<>(newMap);
         }
 
         public ForMap<K, V> grepByKey(Function<Boolean, K> grepFunc) {
-            Map<K, V> newm = S.map.hashMap(null);
+            Map<K, V> newMap = S.map.hashMap(null);
 
             for (Entry<K, V> entry : map.entrySet()) {
                 if (grepFunc.apply(entry.getKey())) {
-                    newm.put(entry.getKey(), entry.getValue());
+                    newMap.put(entry.getKey(), entry.getValue());
                 }
             }
 
-            return new ForMap<K, V>(newm);
+            return new ForMap<>(newMap);
         }
 
         public ForMap<K, V> grepByValue(Function<Boolean, V> grepFunc) {
-            Map<K, V> newm = S.map.hashMap(null);
+            Map<K, V> newMap = S.map.hashMap(null);
             for (Entry<K, V> entry : map.entrySet()) {
                 if (grepFunc.apply(entry.getValue())) {
-                    newm.put(entry.getKey(), entry.getValue());
+                    newMap.put(entry.getKey(), entry.getValue());
                 }
             }
-            return new ForMap<K, V>(newm);
+            return new ForMap<>(newMap);
         }
 
         public Entry<K, V> reduce(Function._2<Entry<K, V>, Entry<K, V>, Entry<K, V>> reduceLeft) {
@@ -505,11 +498,11 @@ public class S {
         }
 
         public <R> ForMap<K, R> map(Function<R, V> mapFunc) {
-            Map<K, R> newm = S.map.hashMap(null);
+            Map<K, R> newMap = S.map.hashMap(null);
             for (Entry<K, V> entry : map.entrySet()) {
-                newm.put(entry.getKey(), mapFunc.apply(entry.getValue()));
+                newMap.put(entry.getKey(), mapFunc.apply(entry.getValue()));
             }
-            return new ForMap<K, R>(newm);
+            return new ForMap<>(newMap);
         }
 
         public ForMap<K, V> each(Callback<Entry<K, V>> eachFunc) {
@@ -529,10 +522,6 @@ public class S {
 
         private final Iterable<E> iter;
 
-        public ForIt(Collection<E> e) {
-            iter = e;
-        }
-
         public ForIt(Iterable<E> e) {
             iter = e;
         }
@@ -542,19 +531,18 @@ public class S {
         }
 
         private <R> Collection<R> _initCollection(Class<?> itClass) {
-            Collection<R> re;
-
-            //TODO: treeMap treeSet can put non-compareable
-//            if (Collection.class.isAssignableFrom(itClass)) {
-//                try {
-//                    re = _one(itClass);
-//                } catch (InstantiationException | IllegalAccessException e) {
-            re = list.one();
-//                }
-//            } else {
-//                re = list.one();
-//            }
-            return re;
+            if (Collection.class.isAssignableFrom(itClass)
+                && !itClass.getSimpleName().startsWith("Unmodifiable")) {
+                try {
+                    return S._one(itClass);
+                } catch (InstantiationException | IllegalAccessException e) {
+                    e.printStackTrace();
+                    return null;
+                    //TODO test
+                }
+            } else {
+                return list.one();
+            }
         }
 
         public <R> ForIt<R> map(final Function<R, E> mapper) {
@@ -563,7 +551,7 @@ public class S {
             each((e) -> {
                 result.add(mapper.apply(e));
             });
-            return new ForIt(result);
+            return new ForIt<>(result);
         }
 
         public ForIt<E> each(Callback<E> eachFunc) {
@@ -579,7 +567,7 @@ public class S {
                     c.add(e);
                 }
             });
-            return new ForIt(c);
+            return new ForIt<>(c);
         }
 
         public E reduce(final Function._2<E, E, E> reduceLeft) {
@@ -603,7 +591,7 @@ public class S {
         }
 
         public E[] join() {
-            return S.array.<E>of(iter);
+            return S.array.of(iter);
         }
 
     }
@@ -611,15 +599,14 @@ public class S {
     public static class file {
 
         /**
-         *
          * abc.txt => [abc, txt] abc.def.txt => [abc.def, txt] abc. =>
          * [abc.,null] .abc => [.abc,null] abc => [abc,null]
          *
-         * @param file
-         * @return
+         * @param file file
+         * @return string array with size of 2, first is the filename, remain the suffix;
          */
         public static String[] splitSuffixName(File file) {
-            S._assert(file, "file null");
+            S._assert(file);
             String file_name = file.getName();
             int idx_dot = file_name.lastIndexOf('.');
             if (idx_dot <= 0 || idx_dot == file_name.length()) {
@@ -631,32 +618,36 @@ public class S {
         public static File mkdir(File par, String name) throws IOException {
             final String path = par.getAbsolutePath() + File.separatorChar + name;
             File f = new File(path);
-            f.mkdirs();
-            f.createNewFile();
-            return f;
+            if (f.mkdirs() && f.createNewFile()) {
+                return f;
+            }
+            return null;
         }
 
         public static File touch(File par, String name) throws IOException {
             final String path = par.getAbsolutePath() + File.separatorChar + name;
             File f = new File(path);
-            f.createNewFile();
-            return f;
+            if (f.createNewFile()) {
+                return f;
+            }
+            return null;
         }
 
         /**
-         * Delets a dir recursively deleting anything inside it.
+         * Delete a dir recursively deleting anything inside it.
          *
          * @param file The dir to delete
          * @return true if the dir was successfully deleted
          */
+        @SuppressWarnings("ResultOfMethodCallIgnored")
         public static boolean rm(File file) {
             if (!file.exists() || !file.isDirectory()) {
                 return false;
             }
 
             String[] files = file.list();
-            for (int i = 0, len = files.length; i < len; i++) {
-                File f = new File(file, files[i]);
+            for (String file1 : files) {
+                File f = new File(file, file1);
                 if (f.isDirectory()) {
                     rm(f);
                 } else {
@@ -690,33 +681,30 @@ public class S {
         @SuppressWarnings("serial")
         final static public class FList<T> extends ArrayList<T> {
 
-            protected FList() {
+            public FList() {
                 super();
             }
 
-            protected FList(T[] a) {
+            public FList(T[] a) {
                 super();
                 this.addAll(Arrays.asList(a));
             }
 
-            protected FList(List<T> a) {
+            public FList(List<T> a) {
                 super(a);
             }
 
-            protected FList(Iterable<T> iter) {
+            public FList(Iterable<T> iter) {
                 super();
-                final Iterator<T> it = iter.iterator();
-                while (it.hasNext()) {
-                    this.add(it.next());
-                }
+                iter.forEach(this::add);
             }
 
-            protected FList(int i) {
+            public FList(int i) {
                 super(i);
             }
 
             public FList<T> slice(int start, int end) {
-                final FList<T> ret = new FList<T>();
+                final FList<T> ret = new FList<>();
                 for (int i = start; i < end; i++) {
                     ret.add(this.get(i));
                 }
@@ -724,7 +712,7 @@ public class S {
             }
 
             public FList<T> slice(int start) {
-                final FList<T> ret = new FList<T>();
+                final FList<T> ret = new FList<>();
                 for (int i = start; i < size(); i++) {
                     ret.add(this.get(i));
                 }
@@ -742,21 +730,6 @@ public class S {
                 return result;
             }
 
-            @SuppressWarnings({"rawtypes", "unchecked"})
-            public Object reduceRight(Function._2 reduceFunc) {
-                if (this.size() == 1) {
-                    return this.get(0);
-                }
-                Object result = null;
-                T next;
-                for (int i = this.size() - 1; i >= 1; i--) {
-                    result = this.get(i);
-                    next = this.get(i - 1);
-                    result = reduceFunc.apply(result, next);
-                }
-                return result;
-            }
-
             public String join(String sep) {
                 final StringBuilder sb = new StringBuilder();
                 for (T t : this) {
@@ -767,20 +740,17 @@ public class S {
         }
 
         public static <E> FList<E> one() {
-            return new FList();
+            return new FList<>();
         }
 
         public static <E> FList<E> one(Iterable<E> iterable) {
-            return new FList(iterable);
+            return new FList<>(iterable);
         }
 
         public static <E> FList<E> one(E[] arr) {
-            return new FList(arr);
+            return new FList<>(arr);
         }
 
-        public static <E> FList<E> one(List<E> list) {
-            return new FList(list);
-        }
     }
 
     /**
@@ -821,7 +791,8 @@ public class S {
          * Print a matrix whose each row as a String.
          * </p>
          *
-         * @return
+         * @return a string represent the input
+         * matrix using '\n' to separate between lines
          */
         public static String mkStr(Rect r) {
             StringBuilder sb = new StringBuilder();
@@ -866,12 +837,13 @@ public class S {
         public static Matrix fromString(String... s) {
             S.echo(s);
             final int maxLen = list.one(array.<String>of(array.compact(s))).reduceLeft(
-                    (String a, String b) -> {
-                        if (a == null || b == null) {
-                            return "";
-                        }
-                        return a.length() > b.length() ? a : b;
-                    }).length();
+                (String a, String b) -> {
+                    if (a == null || b == null) {
+                        return "";
+                    }
+                    return a.length() > b.length() ? a : b;
+                }
+            ).length();
 
             int[][] ret = new int[s.length][maxLen];
             for (int i = 0; i < s.length; i++) {
@@ -889,22 +861,24 @@ public class S {
     final public static class nothing {
 
         public final static Boolean _boolean = Boolean.FALSE;
-        public final static Character _char = new Character((char) '\0');
-        public final static Byte _byte = new Byte((byte) 0);
-        public final static Integer _int = new Integer(0);
-        public final static Short _short = new Short((short) 0);// ???
-        public final static Long _long = new Long(0);
-        public final static Float _float = new Float(0);
-        public final static Double _double = new Double(0);
+        public final static Character _char = (char) '\0';
+        public final static Byte _byte = (byte) 0;
+        public final static Integer _int = 0;
+        public final static Short _short = (short) 0;// ???
+        public final static Long _long = (long) 0;
+        public final static Float _float = (float) 0;
+        public final static Double _double = (double) 0;
 
         final static Cache<Class<?>, Object> _nothingValues = Cache.<Class<?>, Object>defaultCache().onNotFound(
             a -> Enhancer.create(_notNull(a), (MethodInterceptor) (Object obj, Method method, Object[] args, MethodProxy proxy) -> null));
 
         static {
-            _nothingValues.put(String.class, "").put(Boolean.class, _boolean).put(Integer.class, _int)
-                    .put(Byte.class, _byte).put(Character.class, _char).put(Short.class, _short).put(Long.class, _long)
-                    .put(Float.class, _float).put(Double.class, _double).put(Object.class, new Object());
+            _nothingValues.put(String.class, "")
+                .put(Boolean.class, _boolean).put(Integer.class, _int)
+                .put(Byte.class, _byte).put(Character.class, _char).put(Short.class, _short).put(Long.class, _long)
+                .put(Float.class, _float).put(Double.class, _double).put(Object.class, new Object());
         }
+
         final private Class<?> proxyClass;
 
         protected nothing(Class<?> clazz) {
@@ -929,7 +903,6 @@ public class S {
      * ******************* P **********************
      */
     /**
-     *
      * @param <T>
      */
     @SuppressWarnings("unchecked")
@@ -949,7 +922,7 @@ public class S {
         }
 
         public static <T> proxy<T> of(T t) {
-            return new proxy((Class<T>) t.getClass(), t);
+            return new proxy(t.getClass(), t);
         }
 
         public T origin() {
@@ -976,10 +949,12 @@ public class S {
 
         private static String webRoot;
 
+        @SuppressWarnings("ConstantConditions")
         public static String rootAbsPath(Object caller) {
             return caller.getClass().getClassLoader().getResource("/").getPath();
         }
 
+        @SuppressWarnings("ConstantConditions")
         public static String rootAbsPath(Class<?> callerClass) {
             return callerClass.getClassLoader().getResource("/").getPath();
         }
@@ -995,6 +970,7 @@ public class S {
             return new File(path).getAbsolutePath();
         }
 
+        @SuppressWarnings("ConstantConditions")
         public static String rootClassPath() {
             try {
                 String path = S.class.getClassLoader().getResource("").toURI().getPath();
@@ -1046,7 +1022,7 @@ public class S {
          * WARNING!!! ONLY POSITIVE VALUES WILL BE RETURN
          * </p>
          *
-         * @param value
+         * @param value input value
          * @return above zero
          */
         public static int toUnsigned(String value) {
@@ -1080,9 +1056,7 @@ public class S {
      * ******************* S **********************
      */
     /**
-     *
      * @author ed
-     *
      */
     public static class stream {
 
@@ -1091,8 +1065,8 @@ public class S {
         /**
          * write from is to os;
          *
-         * @param in
-         * @param out
+         * @param in  inputStream
+         * @param out outputStream
          * @throws IOException
          */
         public static void write(final InputStream in, final OutputStream out) throws IOException {
@@ -1154,11 +1128,10 @@ public class S {
         }
 
         /**
-         *
-         * @param ori
-         * @param ch
-         * @param idx
-         * @return
+         * @param ori original string
+         * @param ch  char
+         * @param idx index of occurrence of specified char
+         * @return real index of the input char
          */
         public static int indexOf(String ori, char ch, int idx) {
             char c;
@@ -1180,8 +1153,7 @@ public class S {
      * ******************* T **********************
      */
     /**
-     *
-     * @return
+     * @return system current time as millseconds
      */
     public static long time() {
         return System.currentTimeMillis();
@@ -1202,9 +1174,7 @@ public class S {
 
         public static String vid() {
             UUID uuid = java.util.UUID.randomUUID();
-            String vid = uuid.toString().replaceAll("-", "");
-            // System.out.println(tmp);
-            return vid;
+            return uuid.toString().replaceAll("-", "");
         }
     }
     /**
