@@ -1,9 +1,9 @@
 package com.shuimin.base.util.logger;
 
+import com.shuimin.base.S;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import com.shuimin.base.S;
 
 /**
  * <p>
@@ -169,27 +169,37 @@ public class Logger {
         }
     }
 
+    private static class holder{
+        private final static Logger root = getDefault();
+    }
+
+
+    public static Logger create(String name){
+        return holder.root.addOut(new Out() {
+            @Override
+            protected void _print(String s) {
+                System.out.print(s);
+            }
+        }.name(name));
+    }
+
+    public static Logger get() {
+        return holder.root;
+    }
+
     public static Logger getDefault() {
-        Out defaut = new Out() {
+        Out defa= new Out() {
             @Override
             protected void _print(String s) {
                 System.out.print(s);
             }
         };
-        defaut.lvl(INFO);
-        defaut.name("default");
-        return new Logger(new Out[]{defaut});
+        defa.lvl(INFO);
+        defa.name("default");
+        return new Logger(new Out[]{defa});
     }
 
     public static Logger getDebug() {
-        Out debug = new Out() {
-            @Override
-            protected void _print(String s) {
-                System.out.print(s);
-            }
-        };
-        debug.lvl(DEBUG);
-        debug.name("debug");
-        return new Logger(new Out[]{debug});
+        return holder.root.config("default",DEBUG);
     }
 }

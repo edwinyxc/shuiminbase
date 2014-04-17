@@ -1147,6 +1147,77 @@ public class S {
             }
             return -1;
         }
+
+        /**
+         * Generates a camel case version of a phrase from underscore.
+         *
+         * @param underscore underscore version of a word to converted to camel case.
+         * @return camel case version of underscore.
+         */
+        public static String camelize(String underscore) {
+            return camelize(underscore, false);
+        }
+
+        public static String pascalize(String underscore) {
+            return camelize(underscore, true);
+        }
+
+
+        /**
+         * Generates a camel case version of a phrase from underscore.
+         *
+         * @param underscore          underscore version of a word to converted to camel case.
+         * @param capitalizeFirstChar set to true if first character needs to be capitalized, false if not.
+         * @return camel case version of underscore.
+         */
+        public static String camelize(String underscore, boolean capitalizeFirstChar) {
+            String result = "";
+            StringTokenizer st = new StringTokenizer(underscore, "_");
+            while (st.hasMoreTokens()) {
+                result += capitalize(st.nextToken());
+            }
+            return capitalizeFirstChar ? result : result.substring(0, 1).toLowerCase() + result.substring(1);
+        }
+
+        /**
+         * Capitalizes a word  - only a first character is converted to upper case.
+         *
+         * @param word word/phrase to capitalize.
+         * @return same as input argument, but the first character is capitalized.
+         */
+        public static String capitalize(String word) {
+            return word.substring(0, 1).toUpperCase() + word.substring(1);
+        }
+
+        /**
+         * Converts a CamelCase string to underscores: "AliceInWonderLand" becomes:
+         * "alice_in_wonderland"
+         *
+         * @param camel camel case input
+         * @return result converted to underscores.
+         */
+        public static String underscore(String camel) {
+
+            List<Integer> upper = new ArrayList<Integer>();
+            byte[] bytes = camel.getBytes();
+            for (int i = 0; i < bytes.length; i++) {
+                byte b = bytes[i];
+                if (b < 97 || b > 122) {
+                    upper.add(i);
+                }
+            }
+
+            StringBuffer b = new StringBuffer(camel);
+            for (int i = upper.size() - 1; i >= 0; i--) {
+                Integer index = upper.get(i);
+                if (index != 0)
+                    b.insert(index, "_");
+            }
+
+            return b.toString().toLowerCase();
+
+        }
+
     }
 
     /**
@@ -1178,7 +1249,7 @@ public class S {
         }
     }
     /**
-     * ******************* V **********************
+     ******************* V **********************
      */
     /**
      * ******************* W **********************
